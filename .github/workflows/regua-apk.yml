@@ -74,8 +74,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release delete regua-apk --cleanup-tag --yes || true
-          gh release create regua-apk regua.apk \
-            --target "$GITHUB_SHA" --prerelease \
-            --title "Régua APK (teste)" \
-            --notes "APK de teste do Régua, gerado a partir de $GITHUB_SHA. Dados de exemplo. Instale no Android permitindo apps de fontes desconhecidas."
+          # never delete the current APK before the new one is safely uploaded:
+          # replace the file in place when the release exists, create it only the first time
+          notes="APK de teste do Régua, gerado a partir de $GITHUB_SHA. Dados de exemplo. Instale no Android permitindo apps de fontes desconhecidas."
+          if gh release view regua-apk >/dev/null 2>&1; then
+            gh release upload regua-apk regua.apk --clobber
+            gh release edit regua-apk --notes "$notes"
+          else
+            gh release create regua-apk regua.apk --target "$GITHUB_SHA" --prerelease \
+              --title "Régua APK (teste)" --notes "$notes"
+          fi
