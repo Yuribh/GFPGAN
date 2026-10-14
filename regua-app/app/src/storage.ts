@@ -1,5 +1,6 @@
 // Favorites and search history on the device. Storage failures never break the screen (see F03-E1, F03-E2).
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { addToCompare } from './logic/compare.ts';
 
 async function readList(key: string): Promise<string[]> {
   try {
@@ -23,6 +24,13 @@ export const favorites = {
     await writeList('favs', on ? [id, ...list] : list.filter(x => x !== id));
     return on;
   },
+};
+
+// vehicles picked for the comparison screen (up to 3, see src/logic/compare.ts)
+export const compareList = {
+  list: () => readList('compare'),
+  async add(id: string) { await writeList('compare', addToCompare(await readList('compare'), id)); },
+  async remove(id: string) { await writeList('compare', (await readList('compare')).filter(x => x !== id)); },
 };
 
 export const history = {

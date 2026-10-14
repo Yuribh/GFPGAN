@@ -42,9 +42,12 @@ export default function Home() {
         <Text style={[st.h2, { marginTop: s[5] }]} accessibilityRole="header">Ferramentas</Text>
         <View style={st.tools}>
           <Tool icon="search" label="Buscar veículo" onPress={() => open('cars')} />
+          <Tool icon="credit-card" label="Consulta por placa" onPress={() => guard.take() && router.push('/plate')} />
+          <Tool icon="bar-chart-2" label="Comparar preços" onPress={() => guard.take() && router.push('/compare')} />
           <Tool icon="clock" label="Histórico" onPress={() => guard.take() && router.push('/history')} />
           <Tool icon="heart" label="Favoritos" onPress={() => router.navigate('/favorites')} />
-          <Tool icon="bar-chart-2" label="Comparar (em breve)" disabled />
+          <Tool icon="tag" label="Card de venda" onPress={() => guard.take() && router.push({ pathname: '/choose', params: { then: 'card' } })} />
+          <Tool icon="file-text" label="Relatório" onPress={() => guard.take() && router.push({ pathname: '/choose', params: { then: 'report' } })} />
         </View>
 
         {/* one fixed banner on the free plan, never pop-ups; hidden for Régua Plus */}

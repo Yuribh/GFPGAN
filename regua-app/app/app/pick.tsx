@@ -11,6 +11,7 @@ import { createLatest, createTapGuard } from '../src/logic/latest.ts';
 import { Header, Loading, Message, Row, st as kit } from '../src/ui/kit.tsx';
 import { c, r, s, font, layout } from '../src/theme.ts';
 import { track } from '../src/services/track.ts';
+import { isTool, openTool } from '../src/ui/tools.ts';
 
 type Item = { id: string; label: string; sub?: string; raw: Brand | Model | ModelYear };
 const TYPE_LABEL: Record<VehicleType, string> = { cars: 'Carros', motorcycles: 'Motos', trucks: 'Caminhões' };
@@ -18,7 +19,8 @@ const TITLES = ['Escolha a marca', 'Escolha o modelo', 'Escolha o ano'];
 const isType = (v: unknown): v is VehicleType => v === 'cars' || v === 'motorcycles' || v === 'trucks';
 
 export default function Pick() {
-  const params = useLocalSearchParams<{ type?: string }>();
+  const params = useLocalSearchParams<{ type?: string; then?: string }>();
+  const tool = isTool(params.then) ? params.then : null;
   const vtype: VehicleType = isType(params.type) ? params.type : 'cars';
   const [step, setStep] = useState(0);
   const [brand, setBrand] = useState<Brand | null>(null);
@@ -67,6 +69,7 @@ export default function Pick() {
     if (!guard.take()) return;                              // double tap (BUG-001)
     if (step === 0) { setStatus('loading'); setBrand(item.raw as Brand); setStep(1); }
     else if (step === 1) { setStatus('loading'); setModel(item.raw as Model); setStep(2); }
+    else if (tool) openTool(tool, item.id);
     else router.push(`/vehicle/${encodeURIComponent(item.id)}`);
   };
 

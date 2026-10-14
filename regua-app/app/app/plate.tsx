@@ -11,6 +11,7 @@ import { installId } from '../src/storage.ts';
 import { usePlus } from '../src/services/plus.tsx';
 import { track } from '../src/services/track.ts';
 import { Button, Header, Loading, Message, Row, st as kit } from '../src/ui/kit.tsx';
+import { PlateSearch } from '../src/ui/PlateSearch.tsx';
 import { c, card, s, font, layout } from '../src/theme.ts';
 
 export default function Plate() {
@@ -20,6 +21,7 @@ export default function Plate() {
   const [answer, setAnswer] = useState<PlateAnswer | null>(null);
 
   const load = useCallback(async () => {
+    if (!params.plate) return;                         // opened from the tools: show the search field
     if (!plate) { setAnswer({ status: 'invalid_plate' }); return; }
     setAnswer(null);
     track('plate_lookup');
@@ -33,7 +35,8 @@ export default function Plate() {
 
   const manual = <Button variant="secondary" icon="list" label="Buscar por marca e modelo" onPress={() => router.replace({ pathname: '/pick', params: { type: 'cars' } })} />;
   let body;
-  if (!answer) body = <Loading label="Consultando a placa" />;
+  if (!params.plate) body = <><Text style={kit.muted}>Digite a placa para ver o preço FIPE do modelo.</Text><PlateSearch /></>;
+  else if (!answer) body = <Loading label="Consultando a placa" />;
   else if (answer.status === 'ok') {
     const v = answer.vehicle;
     body = (

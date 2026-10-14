@@ -14,6 +14,7 @@ export function PlateSearch() {
     if (!plate) { setError('Digite a placa com 3 letras e 4 números ou letras, como ABC1D23.'); return; }
     setError('');
     router.push({ pathname: '/plate', params: { plate } });
+    setValue('');
   };
   return (
     <View style={[card, st.box]}>

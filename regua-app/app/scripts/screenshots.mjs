@@ -31,12 +31,13 @@ for (const sz of sizes) {
   await page.goto('http://localhost:4173/');
   await page.getByText('Qual veículo você quer consultar?').waitFor();
   await shot('1-inicio');
-  await page.getByRole('button', { name: 'Carros' }).first().click();
+  await page.getByRole('button', { name: 'Carros', exact: true }).first().click();
   await page.getByText('Marca Exemplo Alfa').waitFor();
   await shot('2-marcas');
-  await page.getByText('Marca Exemplo Alfa').click();
-  await page.getByText('Modelo B 2.0 Automático').click();
-  await page.getByText('0 km').click();
+  // the app ignores a second tap within 400 ms (double-tap guard), so pause like a person would
+  await page.waitForTimeout(600); await page.getByText('Marca Exemplo Alfa').click();
+  await page.waitForTimeout(600); await page.getByText('Modelo B 2.0 Automático').click();
+  await page.waitForTimeout(600); await page.getByText('0 km').click();
   await page.getByText('Evolução do preço').waitFor();
   await page.getByRole('button', { name: 'Favoritar' }).click();
   await shot('3-preco');

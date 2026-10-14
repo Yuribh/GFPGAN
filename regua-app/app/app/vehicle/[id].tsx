@@ -2,11 +2,11 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Pressable, ScrollView, Share, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { repo, usingSampleData } from '../../src/data/index.ts';
 import type { VehicleResult } from '../../src/data/types.ts';
 import { formatBRL, formatModelYear, formatMonth, formatPercent } from '../../src/format.ts';
-import { favorites, history } from '../../src/storage.ts';
+import { compareList, favorites, history } from '../../src/storage.ts';
 import { Button, Header, Loading, Message } from '../../src/ui/kit.tsx';
 import { PriceChart } from '../../src/ui/PriceChart.tsx';
 import { c, card, r, s, font, layout } from '../../src/theme.ts';
@@ -73,6 +73,12 @@ export default function Vehicle() {
                 } finally { toggling.current = false; }
               }} />
             <Button variant="secondary" icon="share" label="Compartilhar" onPress={() => { track('share'); Share.share({ message: shareText }).catch(() => {}); }} />
+          </View>
+          <View style={st.actions}>
+            <Button variant="secondary" icon="bar-chart-2" label="Comparar"
+              onPress={async () => { await compareList.add(v.year.id); router.push('/compare'); }} />
+            <Button variant="secondary" icon="tag" label="Card de venda" onPress={() => router.push(`/sale-card?id=${encodeURIComponent(v.year.id)}`)} />
+            <Button variant="secondary" icon="file-text" label="Relatório" onPress={() => router.push(`/report?id=${encodeURIComponent(v.year.id)}`)} />
           </View>
         </View>
 

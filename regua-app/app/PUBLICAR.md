@@ -17,6 +17,7 @@ Siga na ordem. Cada passo diz onde colocar o que você criar.
 | App Android e iOS (Expo SDK 57), testado: 46 testes, 51 checagens de banco, tipos, bundles Android/iOS/web | `app/`, `src/` |
 | Ícone, ícone adaptativo do Android, tela de abertura, favicon, logo, imagem social | `assets/` (gerados por `scripts/make_icons.py`) |
 | Identificador do app: **`io.github.yuribh.regua`** (baseado no seu GitHub Pages, que é seu) | `app.json` |
+| **Ferramentas**: comparar até 3 veículos (com gráfico), card de venda em imagem para compartilhar, relatório de preço em PDF | `app/compare.tsx`, `app/sale-card.tsx`, `app/report.tsx` |
 | **Busca por placa**: campo no início, cache por placa, limite de 3/dia grátis e 30/dia no Plus, teto diário de gastos; a placa nunca é guardada em texto | `app/plate.tsx`, `server/plate/`, `supabase/functions/plate-lookup`, `migrations/0006` |
 | Assinatura **Régua Plus** (remove anúncios): tela de planos, compra, restaurar, cancelar com um toque | `app/plus.tsx`, `src/services/plus.tsx` |
 | **Um banner** do AdMob no plano grátis, com pedido de consentimento (LGPD/GDPR); some para quem assina | `src/services/ads.tsx` |
