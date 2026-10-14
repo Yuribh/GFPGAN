@@ -48,7 +48,7 @@ jobs:
           CI: 1
           ADMOB_ANDROID_APP_ID: ${{ vars.ADMOB_ANDROID_APP_ID }}
 
-      # keys are optional: without them the APK uses sample data, test ads and no subscription
+      # keys are optional: without them the APK reads the FIPE API directly, with test ads and no subscription
       - name: App keys (public, they end up in the app bundle)
         run: |
           {
@@ -76,7 +76,7 @@ jobs:
         run: |
           # never delete the current APK before the new one is safely uploaded:
           # replace the file in place when the release exists, create it only the first time
-          notes="APK de teste do Régua, gerado a partir de $GITHUB_SHA. Dados de exemplo. Instale no Android permitindo apps de fontes desconhecidas."
+          notes="APK de teste do Régua, gerado a partir de $GITHUB_SHA. Preços reais da tabela FIPE. Instale no Android permitindo apps de fontes desconhecidas."
           if gh release view regua-apk >/dev/null 2>&1; then
             gh release upload regua-apk regua.apk --clobber
             gh release edit regua-apk --notes "$notes"

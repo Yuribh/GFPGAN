@@ -37,6 +37,9 @@ jobs:
       - name: Type check
         run: npx tsc --noEmit
 
+      - name: Real FIPE table read by the app without Supabase (the APK's default)
+        run: node scripts/smoke-live.mts
+
       - name: Start PostgreSQL (preinstalled on the runner)
         run: sudo systemctl start postgresql.service && pg_lsclusters
       - name: Database checks (access rules, ingestion, billing, quotas)
