@@ -12,9 +12,9 @@ export function parsePriceToCents(text: string): number {
   return Number(m[1].replace(/\./g, '')) * 100 + Number(m[2]);
 }
 
-/** "abril de 2024" (sometimes with trailing spaces) -> { year: 2024, month: 4 } */
+/** "outubro/2026" (what /references returns, seen 2026-10-14) or "abril de 2024" (vehicle answers) -> { year, month } */
 export function parseReferenceMonth(text: string): { year: number; month: number } {
-  const m = /^\s*([a-zç]+)\s+de\s+(\d{4})\s*$/i.exec(text);
+  const m = /^\s*([a-zç]+)\s*(?:\/|\s+de\s+)\s*(\d{4})\s*$/i.exec(text);
   const month = m ? MONTHS[m[1].toLowerCase()] : undefined;
   if (!m || !month) throw new Error(`unrecognised reference month: ${JSON.stringify(text)}`);
   return { year: Number(m[2]), month };

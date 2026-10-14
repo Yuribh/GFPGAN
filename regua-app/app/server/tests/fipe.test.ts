@@ -151,3 +151,19 @@ test('an unparseable price fails the run without crashing the job', async () => 
   assert.match(r.error!, /unrecognised price/);
   assert.equal(m.runs.at(-1)!.status, 'failed');
 });
+
+// ---------- real answers from the FIPE API, captured from GitHub Actions on 2026-10-14 ----------
+test('parses the real /references month format ("outubro/2026") and the vehicle format ("outubro de 2026")', () => {
+  assert.deepEqual(parseReferenceMonth('outubro/2026'), { year: 2026, month: 10 });
+  assert.deepEqual(parseReferenceMonth('março/2026'), { year: 2026, month: 3 });
+  assert.deepEqual(parseReferenceMonth('dezembro/2025'), { year: 2025, month: 12 });
+  assert.deepEqual(parseReferenceMonth('outubro de 2026'), { year: 2026, month: 10 });
+  assert.throws(() => parseReferenceMonth('2026/10'));
+});
+test('parses a real vehicle answer (Toyota Corolla Altis híbrido 2025)', () => {
+  const real = { vehicleType: 1, price: 'R$ 173.645,00', brand: 'Toyota', model: 'Corolla Altis 1.8 16V Aut. (Híbrido)', modelYear: 2025,
+    fuel: 'Híbrido', codeFipe: '002182-2', referenceMonth: 'outubro de 2026', fuelAcronym: 'H' };
+  assert.equal(parsePriceToCents(real.price), 17_364_500);
+  assert.deepEqual(parseYearCode('2025-6'), { modelYear: 2025, fuelCode: 6 });
+  assert.deepEqual(parseReferenceMonth(real.referenceMonth), { year: 2026, month: 10 });
+});
