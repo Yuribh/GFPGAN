@@ -40,7 +40,9 @@
     "react-native-web": "^0.21.4"
   },
   "devDependencies": {
+    "@types/pg": "^8.23.1",
     "@types/react": "~19.2",
+    "pg": "^8.23.1",
     "typescript": "~5.9"
   }
 }

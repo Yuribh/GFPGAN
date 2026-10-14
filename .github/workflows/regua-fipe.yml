@@ -1,0 +1,66 @@
+name: Régua FIPE import
+
+# Fills the Supabase database with the FIPE table: applies the migrations, then imports the newest month and the
+# months before it (price history). Resumable: each run continues where the previous one stopped.
+# Needs the secrets SUPABASE_DB_URL (Supabase > Project Settings > Database > Connection string, Session pooler URI)
+# and FIPE_API_TOKEN (fipe.api.br). Optional variable FIPE_REQUESTS_PER_RUN caps requests per run (free plan).
+on:
+  schedule:
+    # every 6 hours on days 1 to 20 of each month: picks up the new table and finishes long imports
+    - cron: '23 */6 1-20 * *'
+  workflow_dispatch:
+    inputs:
+      months:
+        description: 'how many months to keep (newest first)'
+        default: '12'
+      max_minutes:
+        description: 'stop after this many minutes (the next run resumes)'
+        default: '330'
+  push:
+    branches: [claude/regua-app-iyjqep]
+    paths: ['regua-app/app/supabase/migrations/**', 'regua-app/app/scripts/import-fipe.mts', 'regua-app/app/scripts/migrate.mts', '.github/workflows/regua-fipe.yml']
+
+concurrency:
+  group: regua-fipe
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    defaults:
+      run:
+        working-directory: regua-app/app
+    env:
+      DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
+      FIPE_API_TOKEN: ${{ secrets.FIPE_API_TOKEN }}
+      FIPE_REQUESTS_PER_RUN: ${{ vars.FIPE_REQUESTS_PER_RUN }}
+      NODE_OPTIONS: --disable-warning=MODULE_TYPELESS_PACKAGE_JSON
+    steps:
+      - name: Check settings
+        id: cfg
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::notice title=Supabase not connected::Add the SUPABASE_DB_URL secret (Settings > Secrets and variables > Actions) and run this workflow again."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+            [ -n "$FIPE_API_TOKEN" ] || echo "::warning title=No FIPE token::Without FIPE_API_TOKEN the free limit (about 500 requests a day) applies; a full table needs the paid plan."
+          fi
+        working-directory: .
+      - uses: actions/checkout@v4
+        if: steps.cfg.outputs.ready == 'true'
+      - uses: actions/setup-node@v4
+        if: steps.cfg.outputs.ready == 'true'
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: regua-app/app/package-lock.json
+      - run: npm ci
+        if: steps.cfg.outputs.ready == 'true'
+      - name: Apply database migrations
+        if: steps.cfg.outputs.ready == 'true'
+        run: node scripts/migrate.mts
+      - name: Import the FIPE table
+        if: steps.cfg.outputs.ready == 'true'
+        run: node scripts/import-fipe.mts --months "${{ inputs.months || '12' }}" --max-minutes "${{ inputs.max_minutes || '330' }}" --rpm 60

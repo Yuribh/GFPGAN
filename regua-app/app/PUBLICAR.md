@@ -44,21 +44,33 @@ Sem nenhuma chave, o app funciona com dados de exemplo, anúncio de teste do Goo
 - Pesquise "Régua" e "Regua" no INPI (https://busca.inpi.gov.br), classes 9 e 42.
 - Peça a um advogado para revisar `landing/privacidade.html` e `landing/termos.html`, o uso descritivo de "FIPE" e os termos da fonte de dados.
 
-## 3. Dados reais (Supabase + FIPE)
-1. Crie o projeto em https://supabase.com (região São Paulo).
-2. **SQL Editor:** rode, em ordem, `supabase/migrations/0001` a `0005`.
-3. Assine o plano pago da API FIPE (https://fipe.api.br) e **peça por escrito** a autorização de uso comercial.
-4. Publique a função de importação (no seu computador, com a CLI do Supabase):
-   ```
-   npx supabase login
-   npx supabase link --project-ref SEU-PROJECT-REF
-   npx supabase secrets set FIPE_API_TOKEN=... INGEST_CRON_SECRET=uma-senha-longa FIPE_REQUESTS_PER_RUN=400
-   npx supabase functions deploy ingest-fipe --no-verify-jwt
-   ```
-5. Rode `supabase/schedule.sql` no SQL Editor (troque os dois valores entre `< >`). A importação passa a rodar sozinha todo mês.
-6. Ative os backups diários do projeto (Database › Backups).
-7. Chaves no app (GitHub *Variables* e Expo *env*): `EXPO_PUBLIC_SUPABASE_URL` e `EXPO_PUBLIC_SUPABASE_ANON_KEY` (Project Settings › API).
-8. Números do lançamento: no SQL Editor, `select * from app_daily_metrics;`
+## 3. Dados reais: preencher o banco com a tabela FIPE
+O jeito mais simples: o **GitHub Actions** cria as tabelas e importa a tabela FIPE para o Supabase, sem instalar nada.
+
+1. Crie o projeto em https://supabase.com (região **São Paulo**). Guarde a senha do banco.
+2. Assine o plano pago da API FIPE (https://fipe.api.br) e **peça por escrito** a autorização de uso comercial.
+   Uma tabela completa tem perto de 30 mil consultas por mês; o plano grátis (cerca de 500 a 1.000 por dia) não dá conta.
+3. No Supabase, abra **Project Settings › Database › Connection string**, aba **Session pooler**, e copie a URI
+   (troque `[YOUR-PASSWORD]` pela senha do passo 1).
+4. No GitHub, em **Settings › Secrets and variables › Actions › New repository secret**, crie:
+   - `SUPABASE_DB_URL`: a URI do passo 3
+   - `FIPE_API_TOKEN`: o token da API FIPE
+5. Em **Actions › Régua FIPE import**, abra a última execução e clique em **Re-run all jobs** (ou rode pelo botão
+   *Run workflow* depois do merge no `master`). Ele aplica as migrações e começa a importar:
+   primeiro o mês mais novo, depois os 11 anteriores (o histórico do gráfico).
+   Cada execução dura até 5h30 e a seguinte continua de onde parou; o agendamento roda a cada 6 horas nos dias 1 a 20
+   de cada mês, então a tabela nova entra sozinha todo mês (o agendamento só vale depois do merge no `master`).
+   A 60 consultas por minuto, o primeiro mês leva umas 8 horas e cada mês de histórico, outras 8.
+6. Ainda no plano grátis? Crie a variável (não secret) `FIPE_REQUESTS_PER_RUN` = `900` para não passar do limite diário.
+7. Ligue o app ao banco: em **Project Settings › API**, copie a *Project URL* e a chave *anon public* e crie as variáveis
+   `EXPO_PUBLIC_SUPABASE_URL` e `EXPO_PUBLIC_SUPABASE_ANON_KEY` (GitHub *Variables* e Expo *env*). O próximo APK já usa dados reais.
+8. Ative os backups diários (Database › Backups). Para conferir: no SQL Editor, `select count(*) from price_points;`
+
+Alternativa sem GitHub: no computador, `DATABASE_URL=... node scripts/migrate.mts` e
+`DATABASE_URL=... FIPE_API_TOKEN=... node scripts/import-fipe.mts --months 12`.
+
+**As funções do Supabase (passos 3b, 3c, 3e)** e o `supabase/schedule.sql` continuam valendo para placa, consultor e
+histórico. A função `ingest-fipe` é uma alternativa ao import pelo GitHub; não precisa das duas.
 
 ## 3b. Busca por placa (fornecedor pago)
 Cada consulta nova custa dinheiro ao fornecedor (preços vistos: perto de R$ 0,80–1,00 por consulta; placas repetidas vêm do cache, sem custo).
