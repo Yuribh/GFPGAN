@@ -61,11 +61,31 @@ jobs:
           DATABASE_URL: postgres://ci:ci@127.0.0.1:5432/regua_ci
         run: |
           sudo -u postgres psql -q -d regua_ci < supabase/tests/after_migrate.sql
-          sudo -u postgres psql -q -c "create role authenticator login noinherit password 'auth'" -c "grant anon to authenticator"
+          # Supabase's service_role (used by the Edge Functions) bypasses RLS
+          sudo -u postgres psql -q -d regua_ci -c "alter role service_role bypassrls" \
+            -c "grant usage on schema public to service_role" \
+            -c "grant all on all tables in schema public to service_role" \
+            -c "grant all on all sequences in schema public to service_role" \
+            -c "grant execute on all functions in schema public to service_role"
+          sudo -u postgres psql -q -c "create role authenticator login noinherit password 'auth'" -c "grant anon, service_role to authenticator"
           curl -sL https://github.com/PostgREST/postgrest/releases/download/v12.2.3/postgrest-v12.2.3-linux-static-x64.tar.xz | tar xJ -C /tmp
           SECRET=ci-secret-ci-secret-ci-secret-ci-secret-12345
           printf 'db-uri = "postgres://authenticator:auth@127.0.0.1:5432/regua_ci"\ndb-schemas = "public"\ndb-anon-role = "anon"\njwt-secret = "%s"\nserver-port = 3000\n' "$SECRET" > /tmp/pgrst.conf
           /tmp/postgrest /tmp/pgrst.conf > /tmp/pgrst.log 2>&1 &
-          for i in $(seq 1 20); do curl -s -o /dev/null http://127.0.0.1:3000/ && break; sleep 1; done
-          ANON_KEY=$(node -e "const c=require('crypto');const b=o=>Buffer.from(JSON.stringify(o)).toString('base64url');const h=b({alg:'HS256',typ:'JWT'}),p=b({role:'anon'});console.log(h+'.'+p+'.'+c.createHmac('sha256','$SECRET').update(h+'.'+p).digest('base64url'))")
-          PGRST_URL=http://127.0.0.1:3000 ANON_KEY="$ANON_KEY" node scripts/smoke-read.mts
+          jwt() { node -e "const c=require('crypto');const b=o=>Buffer.from(JSON.stringify(o)).toString('base64url');const h=b({alg:'HS256',typ:'JWT'}),p=b({role:process.argv[1]});console.log(h+'.'+p+'.'+c.createHmac('sha256',process.argv[2]).update(h+'.'+p).digest('base64url'))" "$1" "$SECRET"; }
+          ANON_KEY=$(jwt anon); SERVICE_KEY=$(jwt service_role)
+          # ready = the schema cache is loaded and a real table answers, not just the port
+          code=000
+          for i in $(seq 1 60); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' -H "apikey: $ANON_KEY" -H "Authorization: Bearer $ANON_KEY" 'http://127.0.0.1:3000/brands?limit=1' || true)
+            [ "$code" = 200 ] && break; sleep 1
+          done
+          if [ "$code" != 200 ]; then echo "PostgREST not ready (HTTP $code)"; cat /tmp/pgrst.log; exit 1; fi
+          PGRST_URL=http://127.0.0.1:3000 ANON_KEY="$ANON_KEY" node scripts/smoke-read.mts || { cat /tmp/pgrst.log; exit 1; }
+          echo "SERVICE_KEY=$SERVICE_KEY" >> "$GITHUB_ENV"
+      - name: Plate lookup and history report end to end (fake providers, real FIPE rows)
+        env:
+          DATABASE_URL: postgres://ci:ci@127.0.0.1:5432/regua_ci
+          PGRST_URL: http://127.0.0.1:3000
+          SMOKE_RESET: '1'
+        run: node scripts/smoke-plate.mts "$SERVICE_KEY" || { cat /tmp/pgrst.log; exit 1; }
