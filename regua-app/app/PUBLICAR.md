@@ -73,21 +73,32 @@ Alternativa sem GitHub: no computador, `DATABASE_URL=... node scripts/migrate.mt
 histórico. A função `ingest-fipe` é uma alternativa ao import pelo GitHub; não precisa das duas.
 
 ## 3b. Busca por placa (fornecedor pago)
-Cada consulta nova custa dinheiro ao fornecedor (preços vistos: perto de R$ 0,80–1,00 por consulta; placas repetidas vêm do cache, sem custo).
+Como funciona: a pessoa digita a placa → a função `plate-lookup` (no Supabase, onde a chave do fornecedor fica escondida)
+pergunta ao fornecedor marca, modelo, ano e **código FIPE** → o app abre o preço FIPE desse código. Se o código já está no
+seu banco (importação do passo 3), vem de lá; se ainda não está, o app busca o preço direto na API da FIPE. Placas repetidas
+vêm do cache (sem custo); a placa é guardada só como código embaralhado.
+
+Cada consulta nova custa dinheiro ao fornecedor (preços vistos: perto de R$ 0,80–1,00 por consulta).
 1. Escolha um fornecedor de consulta **veicular** (só dados do veículo, sem dados do proprietário) que devolva o **código FIPE**.
    Exemplos encontrados: Consultar Placa, WebXcar, FipeAPI, Direct Data. Peça por escrito: origem dos dados, permissão de uso em app, LGPD, preço.
-2. Rode a migração `0006_plate_lookup.sql` (se ainda não rodou) e publique a função:
-   ```
-   npx supabase secrets set PLATE_API_URL='https://.../{plate}' PLATE_API_TOKEN=... PLATE_API_AUTH=bearer \
-     PLATE_HASH_PEPPER=$(openssl rand -hex 32) PLATE_GLOBAL_DAILY=300 REVENUECAT_SECRET_KEY=...
-   npx supabase functions deploy plate-lookup
-   ```
-   `PLATE_API_AUTH` é `bearer`, `header:Nome-Do-Header` ou `query:nome_do_parametro`, conforme a documentação do fornecedor.
-   `PLATE_GLOBAL_DAILY` é o teto de consultas pagas por dia (300 ≈ R$ 300/dia no pior caso); ajuste ao seu orçamento.
-3. **Me mande um exemplo de resposta do fornecedor** (com dados de teste): o leitor da resposta (`server/plate/provider.ts`)
+2. Crie o projeto no Supabase (passo 3) e cadastre no GitHub (Settings › Secrets and variables › Actions):
+   - Variável `SUPABASE_PROJECT_REF`: o código do projeto (o pedaço `xxxx` de `https://xxxx.supabase.co`).
+   - Segredo `SUPABASE_ACCESS_TOKEN`: supabase.com › Account › Access Tokens › Generate new token.
+   - Segredo `SUPABASE_DB_URL`: o mesmo do passo 3.
+   - Segredos do fornecedor: `PLATE_API_URL` (ex.: `https://api.fornecedor.com/v1/placa/{plate}`), `PLATE_API_TOKEN`,
+     `PLATE_API_AUTH` (`bearer`, `header:Nome-Do-Header` ou `query:nome_do_parametro`, conforme a documentação dele).
+   - Segredo `PLATE_HASH_PEPPER`: qualquer texto longo e aleatório (ex.: o resultado de `openssl rand -hex 32`). Não troque depois.
+3. Actions › **Régua Supabase deploy** › Run workflow. Ele cria as tabelas, envia os segredos, publica as funções e confere
+   que `plate-lookup` está no ar.
+4. Variáveis do app `EXPO_PUBLIC_SUPABASE_URL` e `EXPO_PUBLIC_SUPABASE_ANON_KEY` (passo 3) e rode **Régua APK**: o APK novo
+   já consulta placas de verdade.
+5. **Me mande um exemplo de resposta do fornecedor** (com dados de teste): o leitor da resposta (`server/plate/provider.ts`)
    entende os formatos comuns, mas vale confirmar os nomes dos campos e adicionar um teste com o formato real.
-4. Variável do GitHub `REGUA_PLATE_PROVIDER` com o nome do fornecedor: preenche a política de privacidade.
-5. Sem fornecedor configurado, a busca por placa responde "indisponível agora" e oferece a busca por marca e modelo.
+6. Limites (opcionais, segredos ou padrão): `PLATE_FREE_DAILY` (3 por aparelho/dia), `PLATE_PLUS_DAILY` (30),
+   `PLATE_GLOBAL_DAILY` (300 consultas pagas por dia ≈ R$ 300 no pior caso). Para mudar, adicione no `Function secrets`
+   do workflow ou rode `npx supabase secrets set PLATE_GLOBAL_DAILY=...`.
+7. Variável do GitHub `REGUA_PLATE_PROVIDER` com o nome do fornecedor: preenche a política de privacidade.
+8. Sem fornecedor configurado, a busca por placa responde "indisponível agora" e oferece a busca por marca e modelo.
 
 ## 3c. Consultor (IA)
 1. Crie uma conta em https://platform.claude.com, adicione créditos e gere uma API key.

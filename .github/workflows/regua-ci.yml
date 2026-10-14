@@ -92,3 +92,21 @@ jobs:
           PGRST_URL: http://127.0.0.1:3000
           SMOKE_RESET: '1'
         run: node scripts/smoke-plate.mts "$SERVICE_KEY" || { cat /tmp/pgrst.log; exit 1; }
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Deployed plate function in Deno (the Supabase runtime), and plates priced through the real FIPE API
+        env:
+          DATABASE_URL: postgres://ci:ci@127.0.0.1:5432/regua_ci
+          PGRST_URL: http://127.0.0.1:3000
+          SMOKE_RESET: '1'
+        run: |
+          node scripts/build-functions.mjs
+          node scripts/smoke-functions.mts "$SERVICE_KEY" --live-fipe
+          # every bundle must at least start in Deno (outside the project folder, like on Supabase)
+          for f in supabase/.build/supabase/functions/*/index.ts; do
+            d=$(mktemp -d); cp "$f" "$d/"; (cd "$d" && timeout 60 deno run --allow-all index.ts > log 2>&1 &)
+            for i in $(seq 1 50); do grep -q Listening "$d/log" && break; sleep 1; done
+            grep -q Listening "$d/log" || { echo "FAIL $f"; cat "$d/log"; exit 1; }
+            echo "starts: $f"; pkill -x deno || true; sleep 1
+          done

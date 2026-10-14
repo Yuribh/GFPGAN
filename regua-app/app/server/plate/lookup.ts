@@ -23,7 +23,7 @@ export interface LookupDeps {
 }
 
 export type LookupResult =
-  | { status: 'ok'; vehicle: { brand: string; model: string; year: number | null }; matches: CatalogMatch[]; cached: boolean }
+  | { status: 'ok'; vehicle: { brand: string; model: string; year: number | null; fipeCodes: string[] }; matches: CatalogMatch[]; cached: boolean }
   | { status: 'invalid_plate' }
   | { status: 'invalid_request' }
   | { status: 'not_found' }
@@ -82,7 +82,8 @@ export async function lookupPlate(deps: LookupDeps, body: unknown): Promise<Look
     await deps.store.putCached(key, vehicle);
   }
   const matches = vehicle.fipeCodes.length ? rankMatches(await deps.store.matchFipeCodes(vehicle.fipeCodes), vehicle.year) : [];
-  return { status: 'ok', vehicle: { brand: vehicle.brand, model: vehicle.model, year: vehicle.year }, matches, cached };
+  // the FIPE codes go back too: when our catalog lacks them, the app prices the plate with the FIPE API directly
+  return { status: 'ok', vehicle: { brand: vehicle.brand, model: vehicle.model, year: vehicle.year, fipeCodes: vehicle.fipeCodes }, matches, cached };
 }
 
 /** Plus check on the server, with RevenueCat's REST API and the secret key (never the app's word for it). */

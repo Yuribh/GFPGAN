@@ -1,6 +1,7 @@
 // Minimal, anonymous usage counts (LGPD-friendly): which screens people reach, nothing about who they are.
 // No device id, no advertising id, no IP stored by us. The session id is random per app launch and never saved.
 // Rows go to the app_events table (migration 0005), which the anon key may insert into but never read.
+import { publicKeyHeaders } from '../data/keys.ts';
 
 export const EVENTS = ['app_open', 'lookup_started', 'price_viewed', 'favorite_added', 'share', 'plus_viewed', 'plus_purchased', 'plate_lookup', 'plate_found', 'advisor_asked'] as const;
 export type AppEvent = typeof EVENTS[number];
@@ -35,7 +36,7 @@ export function createAnalytics(opts: AnalyticsOptions) {
         const res = await f(endpoint, {
           method: 'POST',
           headers: {
-            apikey: opts.anonKey!, authorization: `Bearer ${opts.anonKey}`,
+            ...publicKeyHeaders(opts.anonKey!),
             'content-type': 'application/json', prefer: 'return=minimal',
           },
           body: JSON.stringify({ event, session_id: session, platform: opts.platform, app_version: opts.appVersion }),

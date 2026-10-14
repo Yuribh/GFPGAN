@@ -32,3 +32,30 @@ test('maps the function answers the screen handles', async () => {
   const offline = createPlateClient({ url: 'https://x', anonKey: 'k', fetchImpl: (async () => { throw new TypeError('Network request failed'); }) as unknown as typeof fetch });
   assert.deepEqual(await offline.lookup('ABC1234', ID), { status: 'offline' });
 });
+
+test('a plate whose FIPE codes are not in our catalog is priced through the resolver', async () => {
+  const asked: unknown[] = [];
+  const match = { modelYearId: 'fipe:cars:002182-2:2025-6', brand: 'Toyota', model: 'Corolla', modelYear: 2025, fuel: 'Híbrido', fipeCode: '002182-2' };
+  const resolve = async (codes: string[], year: number | null) => { asked.push([codes, year]); return [match]; };
+  const server = (matches: unknown[]) => answering(200, { status: 'ok', vehicle: { brand: 'TOYOTA', model: 'COROLLA', year: 2025, fipeCodes: ['002182-2'] }, matches });
+  const a = await createPlateClient({ url: 'https://x', anonKey: 'k', fetchImpl: server([]), resolve }).lookup('ABC1234', ID);
+  assert.deepEqual(a.status === 'ok' && a.matches, [match]);
+  assert.deepEqual(asked, [[['002182-2'], 2025]]);
+  // the catalog already had it: no extra calls
+  const own = { ...match, modelYearId: 'uuid-1' };
+  const b = await createPlateClient({ url: 'https://x', anonKey: 'k', fetchImpl: server([own]), resolve }).lookup('ABC1234', ID);
+  assert.deepEqual(b.status === 'ok' && b.matches, [own]);
+  assert.equal(asked.length, 1);
+  // FIPE API down: the vehicle still shows, with the manual search
+  const c = await createPlateClient({ url: 'https://x', anonKey: 'k', fetchImpl: server([]), resolve: async () => { throw new Error('down'); } }).lookup('ABC1234', ID);
+  assert.deepEqual(c.status === 'ok' && c.matches, []);
+});
+
+test('sample mode: a real FIPE code, or the invented catalog when asked', async () => {
+  const resolved: string[][] = [];
+  const real = await createPlateClient({ resolve: async codes => { resolved.push(codes); return []; } }).lookup('ABC1234', ID);
+  assert.deepEqual(real.status === 'ok' && real.vehicle.fipeCodes, ['002182-2']);
+  assert.deepEqual(resolved, [['002182-2']]);
+  const fake = await createPlateClient({ sampleCatalog: true }).lookup('ABC1234', ID);
+  assert.equal(fake.status === 'ok' && fake.matches[0].modelYearId, 'y-3');
+});

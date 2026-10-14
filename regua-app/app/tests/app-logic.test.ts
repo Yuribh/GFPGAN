@@ -22,8 +22,13 @@ test('brands: query, anon key headers, mapping, pt-BR order', async () => {
   assert.deepEqual(r.map(b => b.name), ['Ágil', 'Beta', 'Zeta']);
   assert.deepEqual(r[0], { id: 'b2', vehicleType: 'cars', name: 'Ágil' });
   assert.equal(api.calls[0].url, 'https://x.supabase.co/rest/v1/brands?select=id,vehicle_type,name&vehicle_type=eq.cars&order=name');
+  // a publishable key (not a JWT) only goes in apikey
   assert.equal(api.calls[0].headers.apikey, 'anon-key');
-  assert.equal(api.calls[0].headers.authorization, 'Bearer anon-key');
+  assert.equal(api.calls[0].headers.authorization, undefined);
+  // a legacy anon key (a JWT) also goes in Authorization
+  const legacy = postgrest({ '/brands?': [] });
+  await createSupabaseRepository({ ...opts(legacy.fetchImpl), anonKey: 'eyJhbGciOi.x.y' }).listBrands('cars');
+  assert.equal(legacy.calls[0].headers.authorization, 'Bearer eyJhbGciOi.x.y');
 });
 
 test('years: newest first, zero km (32000) on top', async () => {

@@ -8,3 +8,4 @@ android/
 ios/
 _site/
 dist-web/
+supabase/.build/

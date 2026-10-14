@@ -18,4 +18,10 @@ const brl = (c: number) => (c / 100).toLocaleString('pt-BR', { style: 'currency'
 console.log(`${v.brand.name} ${v.model.name} ${v.year.modelYear} (FIPE ${v.year.fipeCode}): ${brl(v.latest.priceCents)} in ${v.latest.referenceMonth}`);
 console.log(`history: ${v.history.map(p => `${p.referenceMonth} ${brl(p.priceCents)}`).join(' | ')}`);
 if (!(v.latest.priceCents > 0) || !/^\d{6}-\d$/.test(v.year.fipeCode)) throw new Error('unexpected answer');
+// plate lookups find the vehicle by its FIPE code
+const byCode = await repo.matchFipeCodes(['002182-2'], 2025);
+console.log(`by FIPE code 002182-2 / 2025: ${JSON.stringify(byCode[0])}`);
+const vc = byCode[0] && await repo.getVehicle(byCode[0].modelYearId);
+if (!vc || !(vc.latest.priceCents > 0)) throw new Error('FIPE code lookup failed');
+console.log(`  price: ${brl(vc.latest.priceCents)} (${vc.latest.referenceMonth}), ${vc.history.length} months`);
 for (const t of ['motorcycles', 'trucks'] as const) console.log(`${t} brands: ${(await repo.listBrands(t)).length}`);

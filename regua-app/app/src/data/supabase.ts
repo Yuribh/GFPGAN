@@ -2,6 +2,7 @@
 // Signed-out reads are allowed by migration 0002, so lookups need no account.
 import type { Brand, FipeRepository, Model, ModelYear, PricePoint, VehicleType } from './types.ts';
 import { buildVehicleResult } from './vehicle.ts';
+import { publicKeyHeaders } from './keys.ts';
 
 export interface SupabaseRepoOptions { url: string; anonKey: string; fetchImpl?: typeof fetch; historyMonths?: number }
 
@@ -23,7 +24,7 @@ export function createSupabaseRepository(opts: SupabaseRepoOptions): FipeReposit
   const base = opts.url.replace(/\/$/, '') + '/rest/v1';
   const historyMonths = opts.historyMonths ?? 24;
   async function get<T>(path: string): Promise<T> {
-    const res = await f(base + path, { headers: { apikey: opts.anonKey, authorization: `Bearer ${opts.anonKey}`, accept: 'application/json' } });
+    const res = await f(base + path, { headers: { ...publicKeyHeaders(opts.anonKey), accept: 'application/json' } });
     if (!res.ok) throw new Error(`Não foi possível carregar (${res.status})`);
     return (await res.json()) as T;
   }

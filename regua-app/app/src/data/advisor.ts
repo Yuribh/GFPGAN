@@ -2,6 +2,7 @@
 // so the screen can be tried; the answer says it is an example.
 import type { VehicleResult } from './types.ts';
 import { formatBRL } from '../format.ts';
+import { publicKeyHeaders } from './keys.ts';
 
 export interface ChatTurn { role: 'user' | 'assistant'; text: string }
 export type AdvisorAnswer =
@@ -20,7 +21,7 @@ export function createAdvisorClient(opts: { url?: string; anonKey?: string; fetc
       try {
         res = await f(endpoint, {
           method: 'POST',
-          headers: { apikey: opts.anonKey!, authorization: `Bearer ${opts.anonKey}`, 'content-type': 'application/json' },
+          headers: { ...publicKeyHeaders(opts.anonKey!), 'content-type': 'application/json' },
           body: JSON.stringify({ question: args.question, history: args.history, installId: args.installId, rcUserId: args.rcUserId, modelYearId: args.vehicle?.year.id }),
         });
       } catch {

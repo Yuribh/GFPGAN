@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createLiveRepository, parseLiveId, parseYear } from '../src/data/live.ts';
+import { createLiveRepository, isLiveId, parseFipeId, parseLiveId, parseYear } from '../src/data/live.ts';
 
 // Shapes and values from the real API (Toyota Corolla Altis Híbrido 2025, FIPE 002182-2, seen 2026-10-14);
 // the September price is invented to check the monthly change.
@@ -17,6 +17,13 @@ function api(opts: { failRefs?: boolean } = {}) {
     [y]: car('outubro de 2026', 'R$ 173.645,00'),
     [`${y}?reference=330`]: car('outubro de 2026', 'R$ 173.645,00'),
     [`${y}?reference=329`]: car('setembro de 2026', 'R$ 175.000,00'),
+    // by FIPE code (plate lookups)
+    '/cars/002182-2/years': [{ code: '2024-6', name: '2024 Híbrido' }, { code: '2025-6', name: '2025 Híbrido' }],
+    '/cars/002182-2/years/2025-6': car('outubro de 2026', 'R$ 173.645,00'),
+    '/cars/002182-2/years/2025-6?reference=330': car('outubro de 2026', 'R$ 173.645,00'),
+    '/cars/002182-2/years/2024-6': car('outubro de 2026', 'R$ 160.000,00'),
+    '/motorcycles/811001-0/years': [{ code: '2022-1', name: '2022 Gasolina' }],
+    '/motorcycles/811001-0/years/2022-1': { ...car('outubro de 2026', 'R$ 15.000,00'), brand: 'Honda', model: 'CG 160', modelYear: 2022, codeFipe: '811001-0' },
   };
   const fetchImpl = (async (url: string) => {
     const path = url.replace('https://fipe.parallelum.com.br/api/v2', '');
@@ -71,4 +78,24 @@ test('unknown vehicle -> null, not an error', async () => {
   const repo = createLiveRepository({ fetchImpl: api().fetchImpl });
   assert.equal(await repo.getVehicle('cars:56:1:2025-6'), null);
   assert.equal(await repo.getVehicle('y-1'), null);
+});
+
+test('plate FIPE codes -> versions by FIPE code, the plate year first, and their price', async () => {
+  const repo = createLiveRepository({ fetchImpl: api().fetchImpl });
+  const m = await repo.matchFipeCodes(['002182-2'], 2025);
+  assert.deepEqual(m, [{ modelYearId: 'fipe:cars:002182-2:2025-6', brand: 'Toyota', model: 'Corolla Altis Híbrido 1.8 16V Aut.', modelYear: 2025, fuel: 'Híbrido', fipeCode: '002182-2' }]);
+  // year unknown: every year, newest first
+  assert.deepEqual((await repo.matchFipeCodes(['002182-2'], null)).map(x => x.modelYear), [2025, 2024]);
+  // a motorcycle code is not found among cars, then is found among motorcycles
+  const moto = await repo.matchFipeCodes(['811001-0'], 2022);
+  assert.equal(moto[0].modelYearId, 'fipe:motorcycles:811001-0:2022-1');
+  assert.equal(moto[0].brand, 'Honda');
+  assert.deepEqual(await repo.matchFipeCodes(['999999-9'], 2020), []);
+  const v = await repo.getVehicle(m[0].modelYearId);
+  assert.equal(v?.latest.priceCents, 17_364_500);
+  assert.equal(v?.year.fipeCode, '002182-2');
+  assert.deepEqual((await repo.listYears(v!.model.id)).map(y => y.id), ['fipe:cars:002182-2:2025-6', 'fipe:cars:002182-2:2024-6']);
+  assert.deepEqual(parseFipeId('fipe:trucks:500001-1:2010-3'), { type: 'trucks', code: '500001-1', year: '2010-3' });
+  assert.equal(parseFipeId('fipe:boats:500001-1:2010-3'), null);
+  assert.ok(isLiveId('fipe:cars:002182-2:2025-6') && isLiveId('cars:56:9984:2025-6') && !isLiveId('3f1c2a9e-0000-4000-8000-000000000000'));
 });

@@ -1,5 +1,6 @@
 // Client for the vehicle-history Edge Function, plus the sample report used when the app has no server keys.
 import type { HistoryReport } from '../../server/history/provider.ts';
+import { publicKeyHeaders } from './keys.ts';
 export type { HistoryReport, HistoryCheck, CheckKey, CheckStatus } from '../../server/history/provider.ts';
 export { CHECK_LABEL } from '../../server/history/provider.ts';
 
@@ -18,7 +19,7 @@ export function createHistoryClient(opts: { url?: string; anonKey?: string; fetc
       try {
         res = await f(endpoint, {
           method: 'POST',
-          headers: { apikey: opts.anonKey!, authorization: `Bearer ${opts.anonKey}`, 'content-type': 'application/json' },
+          headers: { ...publicKeyHeaders(opts.anonKey!), 'content-type': 'application/json' },
           body: JSON.stringify({ plate, transactionId, rcUserId }),
         });
       } catch {
