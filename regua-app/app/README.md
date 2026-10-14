@@ -17,6 +17,12 @@ npm start            # abre o servidor; leia o QR code com o app Expo Go no celu
 
 Sem configuração, o app usa **dados de exemplo** (avisa na tela). Para dados reais, crie `.env.local` a partir de `.env.example` com `EXPO_PUBLIC_SUPABASE_URL` e `EXPO_PUBLIC_SUPABASE_ANON_KEY`, rode as migrações de `supabase/migrations` no seu projeto e a importação (`supabase/functions/ingest-fipe`).
 
+## Instalar no Android sem computador (APK de teste)
+O GitHub Actions (`.github/workflows/regua-apk.yml`) gera o APK a cada push neste app e publica em:
+https://github.com/Yuribh/GFPGAN/releases/download/regua-apk/regua.apk
+(QR code: `../replica/launch/regua-apk-qr.png`). Abra o link no celular, baixe e instale permitindo "fontes desconhecidas".
+Na primeira vez, ative o Actions no repositório (aba **Actions** → "I understand my workflows, go ahead and enable them") e rode o workflow **Régua APK** em "Run workflow".
+
 ## Gerar os apps para as lojas (EAS Build, na nuvem da Expo)
 Não precisa de Mac nem para o iOS.
 ```

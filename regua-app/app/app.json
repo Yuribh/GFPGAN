@@ -13,8 +13,7 @@
       "config": { "usesNonExemptEncryption": false }
     },
     "android": {
-      "package": "br.app.regua",
-      "edgeToEdgeEnabled": true
+      "package": "br.app.regua"
     },
     "plugins": ["expo-router"],
     "experiments": { "typedRoutes": false }
