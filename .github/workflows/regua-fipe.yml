@@ -35,8 +35,22 @@ jobs:
       DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
       FIPE_API_TOKEN: ${{ secrets.FIPE_API_TOKEN }}
       FIPE_REQUESTS_PER_RUN: ${{ vars.FIPE_REQUESTS_PER_RUN }}
+      # API address; defaults to the provider's own in the import script when empty
+      FIPE_API_URL: ${{ vars.FIPE_API_URL }}
       NODE_OPTIONS: --disable-warning=MODULE_TYPELESS_PACKAGE_JSON
     steps:
+      # shows which FIPE API address answers from GitHub and the shape of a vehicle answer (no secrets printed)
+      - name: Check the FIPE API
+        working-directory: .
+        run: |
+          for base in "${FIPE_API_URL:-https://fipe.api.br/api/v2}" https://fipe.parallelum.com.br/api/v2; do
+            for path in /references /cars/brands/56/models/9984/years/2025-6; do
+              auth=(); [ -n "$FIPE_API_TOKEN" ] && auth=(-H "X-Subscription-Token: $FIPE_API_TOKEN")
+              code=$(curl -s -m 20 "${auth[@]}" -o /tmp/fipe.json -w '%{http_code}' "$base$path" || echo 000)
+              echo "$base$path -> HTTP $code"
+              head -c 400 /tmp/fipe.json 2>/dev/null; echo
+            done
+          done
       - name: Check settings
         id: cfg
         run: |
