@@ -327,7 +327,7 @@ class GFPGANModel(BaseModel):
                 for i in range(0, self.log_size - 2):
                     l_pyramid = self.cri_l1(out_rgbs[i], pyramid_gt[i]) * pyramid_loss_weight
                     l_g_total += l_pyramid
-                    loss_dict[f'l_p_{2**(i+3)}'] = l_pyramid
+                    loss_dict[f'l_p_{2**(i + 3)}'] = l_pyramid
 
             # perceptual loss
             if self.cri_perceptual:
