@@ -1,7 +1,8 @@
 import sys, pathlib
 from playwright.sync_api import sync_playwright
-URL = "file://" + str(pathlib.Path("dist/index.html").resolve())
-OUT = pathlib.Path("/home/claude/replica/clone-screens"); OUT.mkdir(exist_ok=True)
+HERE = pathlib.Path(__file__).resolve().parent
+URL = "file://" + str(HERE / "dist" / "index.html")
+OUT = HERE.parents[1] / "replica" / "clone-screens"; OUT.mkdir(parents=True, exist_ok=True)
 errors = []
 def check(cond, msg):
     print(("PASS " if cond else "FAIL ") + msg)

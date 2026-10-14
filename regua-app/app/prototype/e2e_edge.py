@@ -2,8 +2,9 @@
 # Written to state the EXPECTED behaviour; a failure here is a bug to report, not a test to loosen.
 import sys, pathlib, re
 from playwright.sync_api import sync_playwright
-URL = "file://" + str(pathlib.Path("dist/index.html").resolve())
-OUT = pathlib.Path("/home/claude/replica/bugs"); OUT.mkdir(exist_ok=True)
+HERE = pathlib.Path(__file__).resolve().parent
+URL = "file://" + str(HERE / "dist" / "index.html")
+OUT = HERE.parents[1] / "replica" / "bugs"; OUT.mkdir(parents=True, exist_ok=True)
 results = []
 def check(case, cond, msg):
     results.append((case, bool(cond), msg)); print(("PASS " if cond else "FAIL ") + case + " " + msg)
@@ -21,7 +22,7 @@ def to_models(pg, brand="Marca Exemplo Alfa"):
     pg.get_by_role("button", name=brand).click()
 
 with sync_playwright() as p:
-    b = p.chromium.launch()
+    b = p.chromium.launch(executable_path="/opt/pw-browsers/chromium" if pathlib.Path("/opt/pw-browsers/chromium").is_file() else None)
 
     # F01-E1 search without accents (most people type "automatico")
     pg, errs, _ = open_page(b); to_models(pg)
