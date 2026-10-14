@@ -6,6 +6,7 @@ import type { VehicleType } from '../../src/data/types.ts';
 import { usingSampleData } from '../../src/data/index.ts';
 import { createTapGuard } from '../../src/logic/latest.ts';
 import { c, card, r, s, font, layout } from '../../src/theme.ts';
+import { AdBanner } from '../../src/services/ads';
 
 const TYPES: { type: VehicleType; label: string; icon: keyof typeof MaterialCommunityIcons.glyphMap }[] = [
   { type: 'trucks', label: 'Caminhões', icon: 'truck-outline' },
@@ -43,8 +44,8 @@ export default function Home() {
           <Tool icon="bar-chart-2" label="Comparar (em breve)" disabled />
         </View>
 
-        {/* Ad slot: one fixed banner on the free plan, never pop-ups. Reserved height so nothing jumps. */}
-        <View style={st.ad} accessible accessibilityLabel="Espaço reservado para anúncio"><Text style={st.adText}>Anúncio</Text></View>
+        {/* one fixed banner on the free plan, never pop-ups; hidden for Régua Plus */}
+        <View style={st.ad}><AdBanner /></View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -77,6 +78,5 @@ const st = StyleSheet.create({
   tool: { width: '25%', alignItems: 'center', gap: s[2], minHeight: layout['min-touch-target'] },
   circle: { borderRadius: r.pill, backgroundColor: c.accentSoft, alignItems: 'center', justifyContent: 'center' },
   toolText: { color: c.muted, fontSize: font.sm.fontSize, lineHeight: font.sm.lineHeight, textAlign: 'center' },
-  ad: { marginTop: s[5], minHeight: 60, borderRadius: r.sm, backgroundColor: c.surfaceMuted, alignItems: 'center', justifyContent: 'center' },
-  adText: { color: c.muted, fontSize: font.sm.fontSize },
+  ad: { marginTop: s[5], alignItems: 'center' },
 });

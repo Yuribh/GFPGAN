@@ -6,3 +6,5 @@ prototype/dist/
 .expo/
 android/
 ios/
+_site/
+dist-web/

@@ -10,6 +10,7 @@ import { filterByLabel, shortQuery } from '../src/logic/search.ts';
 import { createLatest, createTapGuard } from '../src/logic/latest.ts';
 import { Header, Loading, Message, Row, st as kit } from '../src/ui/kit.tsx';
 import { c, r, s, font, layout } from '../src/theme.ts';
+import { track } from '../src/services/track.ts';
 
 type Item = { id: string; label: string; sub?: string; raw: Brand | Model | ModelYear };
 const TYPE_LABEL: Record<VehicleType, string> = { cars: 'Carros', motorcycles: 'Motos', trucks: 'Caminhões' };
@@ -46,6 +47,7 @@ export default function Pick() {
 
   useEffect(() => { load(); }, [load]);
   useEffect(() => () => latest.cancel(), [latest]);
+  useEffect(() => { track('lookup_started'); }, []);
 
   const back = useCallback(() => {
     if (step === 0) { if (router.canGoBack()) router.back(); else router.replace('/'); return true; }

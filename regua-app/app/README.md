@@ -2,7 +2,7 @@
 
 Um só código em Expo (React Native) gera o app de Android e de iPhone.
 
-**Situação:** a lógica de dados, busca, cobrança, importação e banco está testada (41 testes Node, 42 checagens de banco, 49 checagens de navegador no protótipo). As dependências já estão no `package.json` (Expo SDK 57), `npm run typecheck` passa sem erros e o Metro gera os bundles de Android e iOS (`npx expo export`). **O app ainda não foi aberto num celular**: essa é a próxima verificação. Se algo quebrar, mande o erro.
+**Situação:** pronto para publicar; falta criar as contas e as chaves (passo a passo em **[PUBLICAR.md](PUBLICAR.md)**). Verificado: 46 testes Node (`npm test`), 51 checagens de banco (`npm run test:db`), `npm run typecheck` sem erros, e o Metro gera os bundles de Android, iOS e web. O APK de teste é gerado pelo GitHub Actions. **O app ainda não foi aberto num celular de verdade.**
 
 ## Rodar no seu computador
 Precisa de Node 20 ou mais novo.
@@ -34,9 +34,9 @@ eas build --platform all --profile production       # versões para Play Store e
 eas submit --platform android    # e  --platform ios
 ```
 Antes:
-- **Troque o identificador** `br.app.regua` em `app.json` (`ios.bundleIdentifier` e `android.package`) por um baseado no seu domínio. Depois de publicado ele não muda mais.
+- O identificador é `io.github.yuribh.regua` (`app.json`). Se tiver um domínio próprio e quiser outro, troque **antes** da primeira publicação: depois ele não muda mais.
 - Contas: Google Play Console (taxa única) e Apple Developer Program (anual), em seu nome.
-- Ícone e tela de abertura: ainda não existem (`brand.md` tem o briefing). Até lá o Expo usa o ícone padrão, que as lojas não aceitam.
+- Ícone e tela de abertura estão em `assets/` (gerados por `scripts/make_icons.py` a partir do briefing de `brand.md`).
 
 ## Se der erro
 - `Unable to resolve "./types.ts"`: o código importa arquivos com a extensão `.ts` para que os mesmos arquivos rodem nos testes do Node. Se o Metro da sua versão não aceitar, me avise o erro.
@@ -46,4 +46,8 @@ Antes:
 - `app/` telas (Expo Router): abas Home, Favoritos, Sobre; `pick` (marca, modelo, ano); `vehicle/[id]` (preço e gráfico); `history`.
 - `src/data/` dados: `supabase.ts` (real), `fake.ts` (exemplo), mesma interface.
 - `src/logic/` busca sem acento, proteção contra toque duplo e contra respostas atrasadas (testadas).
-- `server/`, `supabase/` backend, migrações e funções. `prototype/` protótipo web. `landing/` página de venda.
+- `app/plus.tsx` assinatura Régua Plus. `src/services/` assinatura (RevenueCat), anúncio (AdMob), erros (Sentry), contagem anônima de uso.
+- `server/`, `supabase/` backend, migrações e funções (`supabase/schedule.sql` agenda a importação). `prototype/` protótipo web.
+- `landing/` site: página de venda, privacidade, termos, suporte (publicado no GitHub Pages).
+- `store/` material das lojas: capturas, imagem de destaque, respostas dos formulários.
+- Expo Go: abre o app, mas sem anúncio e sem assinatura (precisam de código nativo). Para testar tudo, use o APK ou `eas build --profile development`.

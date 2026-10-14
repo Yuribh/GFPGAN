@@ -10,6 +10,7 @@ import { favorites, history } from '../../src/storage.ts';
 import { Button, Header, Loading, Message } from '../../src/ui/kit.tsx';
 import { PriceChart } from '../../src/ui/PriceChart.tsx';
 import { c, card, r, s, font, layout } from '../../src/theme.ts';
+import { track } from '../../src/services/track.ts';
 
 const TYPE_LABEL = { cars: 'Carros', motorcycles: 'Motos', trucks: 'Caminhões' } as const;
 
@@ -26,7 +27,7 @@ export default function Vehicle() {
     try {
       const v = await repo.getVehicle(String(id));
       setState({ status: 'ready', v });
-      if (v) { history.add(v.year.id); setFav(await favorites.has(v.year.id)); }
+      if (v) { track('price_viewed'); history.add(v.year.id); setFav(await favorites.has(v.year.id)); }
     } catch {
       setState({ status: 'error' });
     }
@@ -65,9 +66,13 @@ export default function Vehicle() {
               onPress={async () => {
                 if (toggling.current) return;            // a second tap while saving would undo the first
                 toggling.current = true;
-                try { setFav(await favorites.toggle(v.year.id)); } finally { toggling.current = false; }
+                try {
+                  const on = await favorites.toggle(v.year.id);
+                  setFav(on);
+                  if (on) track('favorite_added');
+                } finally { toggling.current = false; }
               }} />
-            <Button variant="secondary" icon="share" label="Compartilhar" onPress={() => { Share.share({ message: shareText }).catch(() => {}); }} />
+            <Button variant="secondary" icon="share" label="Compartilhar" onPress={() => { track('share'); Share.share({ message: shareText }).catch(() => {}); }} />
           </View>
         </View>
 

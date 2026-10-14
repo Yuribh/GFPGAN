@@ -46,6 +46,19 @@ jobs:
       - run: npx expo prebuild --platform android --no-install
         env:
           CI: 1
+          ADMOB_ANDROID_APP_ID: ${{ vars.ADMOB_ANDROID_APP_ID }}
+
+      # keys are optional: without them the APK uses sample data, test ads and no subscription
+      - name: App keys (public, they end up in the app bundle)
+        run: |
+          {
+            echo "EXPO_PUBLIC_SUPABASE_URL=${{ vars.EXPO_PUBLIC_SUPABASE_URL }}"
+            echo "EXPO_PUBLIC_SUPABASE_ANON_KEY=${{ vars.EXPO_PUBLIC_SUPABASE_ANON_KEY }}"
+            echo "EXPO_PUBLIC_REVENUECAT_ANDROID_KEY=${{ vars.EXPO_PUBLIC_REVENUECAT_ANDROID_KEY }}"
+            echo "EXPO_PUBLIC_ADMOB_ANDROID_BANNER=${{ vars.EXPO_PUBLIC_ADMOB_ANDROID_BANNER }}"
+            echo "EXPO_PUBLIC_SENTRY_DSN=${{ vars.EXPO_PUBLIC_SENTRY_DSN }}"
+            echo "EXPO_PUBLIC_SUPPORT_EMAIL=${{ vars.REGUA_EMAIL }}"
+          } | grep -v '=$' > .env.local || true
 
       - run: ./gradlew assembleRelease --no-daemon
         working-directory: regua-app/app/android

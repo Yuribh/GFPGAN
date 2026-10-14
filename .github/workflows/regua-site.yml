@@ -1,0 +1,58 @@
+name: Régua site
+
+# Publishes regua-app/app/landing (home, privacy policy, terms, support) and the web prototype to GitHub Pages:
+# https://<owner>.github.io/<repo>/  (the store listings link to privacidade.html and suporte.html there)
+on:
+  push:
+    branches: [master, claude/regua-app-iyjqep]
+    paths: ['regua-app/app/landing/**', 'regua-app/app/prototype/**', 'regua-app/app/src/**', '.github/workflows/regua-site.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: regua-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Assemble the site
+        working-directory: regua-app/app
+        env:
+          # repository variables (Settings > Secrets and variables > Actions > Variables)
+          RESPONSAVEL: ${{ vars.REGUA_RESPONSAVEL }}
+          EMAIL: ${{ vars.REGUA_EMAIL }}
+        run: |
+          (cd prototype && node build.mjs)
+          mkdir -p _site/prototipo
+          cp -r landing/. _site/
+          cp prototype/dist/index.html _site/prototipo/index.html
+          sed -i 's#\.\./prototype/dist/index\.html#prototipo/#g' _site/index.html
+          # fill the owner details in the legal pages when the variables are set
+          for f in _site/privacidade.html _site/termos.html _site/suporte.html; do
+            if [ -n "$RESPONSAVEL" ]; then sed -i "s#\[nome completo ou razão social e CPF/CNPJ\]#${RESPONSAVEL//#/\\#}#g" "$f"; fi
+            if [ -n "$EMAIL" ]; then sed -i "s#\[e-mail de suporte\]#<a href=\"mailto:$EMAIL\">$EMAIL</a>#g; s#\[e-mail\]#<a href=\"mailto:$EMAIL\">$EMAIL</a>#g" "$f"; fi
+            if [ -n "$RESPONSAVEL" ] && [ -n "$EMAIL" ]; then sed -i 's/ class="todo"//g' "$f"; fi
+          done
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: regua-app/app/_site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -4,18 +4,37 @@
     "slug": "regua",
     "scheme": "regua",
     "version": "0.1.0",
+    "description": "Preço da tabela FIPE de carros, motos e caminhões, sem cadastro e sem pop-up.",
     "orientation": "portrait",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "backgroundColor": "#f2f2f2",
+    "primaryColor": "#b5420c",
     "ios": {
-      "bundleIdentifier": "br.app.regua",
+      "bundleIdentifier": "io.github.yuribh.regua",
       "supportsTablet": false,
-      "config": { "usesNonExemptEncryption": false }
+      "config": {
+        "usesNonExemptEncryption": false
+      },
+      "buildNumber": "1"
     },
     "android": {
-      "package": "br.app.regua"
+      "package": "io.github.yuribh.regua",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "monochromeImage": "./assets/adaptive-icon-mono.png",
+        "backgroundColor": "#b5420c"
+      }
     },
-    "plugins": ["expo-router"],
-    "experiments": { "typedRoutes": false }
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "experiments": {
+      "typedRoutes": false
+    }
   }
 }

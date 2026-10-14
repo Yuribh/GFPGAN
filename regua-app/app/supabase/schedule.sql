@@ -1,0 +1,21 @@
+-- Schedules the monthly FIPE import. Run ONCE in the Supabase SQL editor after deploying the ingest-fipe function.
+-- Not a migration: it holds your project URL and secret. Replace the two <...> values before running.
+-- Needs the pg_cron and pg_net extensions (Database > Extensions in the dashboard, or the two lines below).
+create extension if not exists pg_cron;
+create extension if not exists pg_net;
+
+-- every 10 minutes on days 1 to 12 of each month: each call imports one slice and resumes from its checkpoint
+select cron.schedule('ingest-fipe', '*/10 * 1-12 * *', $$
+  select net.http_post(
+    url := 'https://<PROJECT-REF>.supabase.co/functions/v1/ingest-fipe',
+    headers := jsonb_build_object('Authorization', 'Bearer <INGEST_CRON_SECRET>', 'Content-Type', 'application/json'),
+    body := '{}'::jsonb,
+    timeout_milliseconds := 150000
+  );
+$$);
+
+-- monthly cleanup of usage counts older than a year (migration 0005)
+select cron.schedule('prune-app-events', '0 4 15 * *', $$ select prune_app_events(); $$);
+
+-- to check: select * from cron.job_run_details order by start_time desc limit 20;
+-- to stop:  select cron.unschedule('ingest-fipe');
