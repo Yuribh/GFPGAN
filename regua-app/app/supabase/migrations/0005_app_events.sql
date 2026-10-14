@@ -3,7 +3,7 @@
 -- The app (anon key) may insert rows but never read, change or delete them; the owner reads them in the dashboard.
 create table app_events (
   id bigint generated always as identity primary key,
-  event text not null check (event in ('app_open', 'lookup_started', 'price_viewed', 'favorite_added', 'share', 'plus_viewed', 'plus_purchased', 'plate_lookup', 'plate_found')),
+  event text not null check (event in ('app_open', 'lookup_started', 'price_viewed', 'favorite_added', 'share', 'plus_viewed', 'plus_purchased', 'plate_lookup', 'plate_found', 'advisor_asked')),
   session_id uuid not null,
   platform text not null check (platform in ('android', 'ios', 'web')),
   app_version text not null check (char_length(app_version) <= 32),

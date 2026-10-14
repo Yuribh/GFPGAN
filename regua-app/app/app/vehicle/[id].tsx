@@ -79,6 +79,7 @@ export default function Vehicle() {
               onPress={async () => { await compareList.add(v.year.id); router.push('/compare'); }} />
             <Button variant="secondary" icon="tag" label="Card de venda" onPress={() => router.push(`/sale-card?id=${encodeURIComponent(v.year.id)}`)} />
             <Button variant="secondary" icon="file-text" label="Relatório" onPress={() => router.push(`/report?id=${encodeURIComponent(v.year.id)}`)} />
+            <Button variant="secondary" icon="message-circle" label="Perguntar ao consultor" onPress={() => router.push(`/advisor?id=${encodeURIComponent(v.year.id)}`)} />
           </View>
         </View>
 

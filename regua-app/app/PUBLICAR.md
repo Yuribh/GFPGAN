@@ -17,6 +17,7 @@ Siga na ordem. Cada passo diz onde colocar o que você criar.
 | App Android e iOS (Expo SDK 57), testado: 46 testes, 51 checagens de banco, tipos, bundles Android/iOS/web | `app/`, `src/` |
 | Ícone, ícone adaptativo do Android, tela de abertura, favicon, logo, imagem social | `assets/` (gerados por `scripts/make_icons.py`) |
 | Identificador do app: **`io.github.yuribh.regua`** (baseado no seu GitHub Pages, que é seu) | `app.json` |
+| **Consultor** com IA (Claude): dúvidas de compra e venda com os dados FIPE do veículo; 5 perguntas/dia grátis, 50 no Plus, teto diário de gasto | `app/advisor.tsx`, `server/advisor/`, `supabase/functions/advisor`, `migrations/0007` |
 | **Ferramentas**: comparar até 3 veículos (com gráfico), card de venda em imagem para compartilhar, relatório de preço em PDF | `app/compare.tsx`, `app/sale-card.tsx`, `app/report.tsx` |
 | **Busca por placa**: campo no início, cache por placa, limite de 3/dia grátis e 30/dia no Plus, teto diário de gastos; a placa nunca é guardada em texto | `app/plate.tsx`, `server/plate/`, `supabase/functions/plate-lookup`, `migrations/0006` |
 | Assinatura **Régua Plus** (remove anúncios): tela de planos, compra, restaurar, cancelar com um toque | `app/plus.tsx`, `src/services/plus.tsx` |
@@ -74,6 +75,19 @@ Cada consulta nova custa dinheiro ao fornecedor (preços vistos: perto de R$ 0,8
    entende os formatos comuns, mas vale confirmar os nomes dos campos e adicionar um teste com o formato real.
 4. Variável do GitHub `REGUA_PLATE_PROVIDER` com o nome do fornecedor: preenche a política de privacidade.
 5. Sem fornecedor configurado, a busca por placa responde "indisponível agora" e oferece a busca por marca e modelo.
+
+## 3c. Consultor (IA)
+1. Crie uma conta em https://platform.claude.com, adicione créditos e gere uma API key.
+2. Rode a migração `0007_feature_quota.sql` e publique a função:
+   ```
+   npx supabase secrets set ANTHROPIC_API_KEY=... ADVISOR_FREE_DAILY=5 ADVISOR_PLUS_DAILY=50 ADVISOR_GLOBAL_DAILY=2000
+   npx supabase functions deploy advisor
+   ```
+3. Custo: cada pergunta usa o modelo Claude Opus 5.5 com esforço baixo e respostas curtas. `ADVISOR_GLOBAL_DAILY` é o teto de perguntas por dia no app todo; ajuste ao orçamento e acompanhe o gasto no painel da Anthropic.
+4. Sem a chave, o Consultor responde "indisponível agora".
+
+## 3d. Cotar seguro (opcional)
+Se fechar parceria com uma seguradora ou corretora, coloque o link (https) em `EXPO_PUBLIC_INSURANCE_URL` e o nome do botão em `EXPO_PUBLIC_INSURANCE_LABEL`. Sem isso, a ferramenta não aparece.
 
 ## 4. Anúncios (AdMob)
 1. Crie a conta em https://admob.google.com e adicione o app (Android; depois iOS).

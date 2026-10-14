@@ -17,3 +17,9 @@ export const links = {
   support: str(extra.supportUrl) ?? 'https://yuribh.github.io/GFPGAN/suporte.html',
   supportEmail: str(extra.supportEmail),
 };
+
+/** Partner insurance quote (opens the partner's page). Hidden until EXPO_PUBLIC_INSURANCE_URL is set. */
+const insuranceUrl = process.env.EXPO_PUBLIC_INSURANCE_URL;
+export const insurance = insuranceUrl && /^https:\/\//.test(insuranceUrl)
+  ? { url: insuranceUrl, label: process.env.EXPO_PUBLIC_INSURANCE_LABEL || 'Cotar seguro' }
+  : null;

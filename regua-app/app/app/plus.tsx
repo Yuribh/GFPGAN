@@ -9,7 +9,7 @@ import { track } from '../src/services/track.ts';
 import { Button, Header, Loading, Message, st as kit } from '../src/ui/kit.tsx';
 import { c, card, r, s, font, layout } from '../src/theme.ts';
 
-const PERKS = ['Sem anúncio em nenhuma tela', 'Até 30 consultas por placa por dia (3 no grátis)', 'Ajuda a manter a Régua grátis para todo mundo', 'Cancele quando quiser, com um toque'];
+const PERKS = ['Sem anúncio em nenhuma tela', 'Até 30 consultas por placa por dia (3 no grátis)', '50 perguntas por dia ao Consultor (5 no grátis)', 'Ajuda a manter a Régua grátis para todo mundo', 'Cancele quando quiser, com um toque'];
 
 export default function Plus() {
   const plus = usePlus();

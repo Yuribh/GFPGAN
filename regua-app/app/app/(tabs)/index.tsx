@@ -1,4 +1,4 @@
-import { Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { Linking, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -8,6 +8,7 @@ import { createTapGuard } from '../../src/logic/latest.ts';
 import { c, card, r, s, font, layout } from '../../src/theme.ts';
 import { AdBanner } from '../../src/services/ads';
 import { PlateSearch } from '../../src/ui/PlateSearch.tsx';
+import { insurance } from '../../src/services/runtime.ts';
 
 const TYPES: { type: VehicleType; label: string; icon: keyof typeof MaterialCommunityIcons.glyphMap }[] = [
   { type: 'trucks', label: 'Caminhões', icon: 'truck-outline' },
@@ -48,6 +49,8 @@ export default function Home() {
           <Tool icon="heart" label="Favoritos" onPress={() => router.navigate('/favorites')} />
           <Tool icon="tag" label="Card de venda" onPress={() => guard.take() && router.push({ pathname: '/choose', params: { then: 'card' } })} />
           <Tool icon="file-text" label="Relatório" onPress={() => guard.take() && router.push({ pathname: '/choose', params: { then: 'report' } })} />
+          <Tool icon="message-circle" label="Consultor" onPress={() => guard.take() && router.push('/advisor')} />
+          {insurance ? <InsuranceTool url={insurance.url} label={insurance.label} /> : null}
         </View>
 
         {/* one fixed banner on the free plan, never pop-ups; hidden for Régua Plus */}
@@ -55,6 +58,10 @@ export default function Home() {
       </ScrollView>
     </SafeAreaView>
   );
+}
+
+function InsuranceTool({ url, label }: { url: string; label: string }) {
+  return <Tool icon="shield" label={label} onPress={() => { Linking.openURL(url).catch(() => {}); }} />;
 }
 
 function Tool({ icon, label, onPress, disabled }: { icon: keyof typeof Feather.glyphMap; label: string; onPress?: () => void; disabled?: boolean }) {
