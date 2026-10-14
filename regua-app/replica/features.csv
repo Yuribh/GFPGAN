@@ -1,0 +1,42 @@
+feature,area,priority,original,clone,notes
+Sign up with email or social login,onboarding,must,yes,no,mandatory after the iFipe rebrand per a review
+Look up FIPE price by type brand model and year,lookup,must,yes,partial,"core loop; web prototype only, sample data"
+Show FIPE code and reference month on the result,lookup,must,yes,partial,"web prototype only, sample data"
+Switch between cars motorcycles and trucks,lookup,must,yes,partial,"web prototype only, sample data"
+Search inside brand and model lists,lookup,must,yes,partial,"web prototype only, sample data"
+Price evolution chart across months,history,must,yes,partial,"needs monthly data collection; web prototype only, sample data"
+Favorite vehicles,favorites,must,yes,partial,"web prototype only, sample data, stored on the device, no account or sync"
+Push notification when the FIPE table updates,notifications,must,yes,no,
+Share a price via WhatsApp and other apps,sharing,should,yes,partial,"web prototype only, sample data, uses the browser share sheet or copies text"
+Technical sheet for a vehicle,lookup,should,yes,no,source of specs not confirmed
+Ranking of most searched vehicles,discovery,should,yes,no,starts empty for a new user base
+Price change vs last month on favorites,favorites,should,yes,no,inferred
+Delete account and data,privacy,should,yes,partial,"backend logic and cascade tested; Edge Function not run, no screen yet"
+Free plan with ads and paid plan without ads,monetization,should,yes,no,Plus is R$29 per month in the original
+Subscription via Apple and Google billing,monetization,could,yes,partial,webhook logic and database tested; store products and app purchase screen not built
+Regional demand reports by state and city,reports,could,yes,no,needs search data you do not have yet
+Market range beyond FIPE,pricing,could,yes,no,needs your own data sources
+Dark mode,settings,could,unknown,no,not confirmed
+Search by license plate,plate,skip,yes,skip,paid vehicle data provider
+Vehicle history and occurrences by plate,plate,skip,yes,skip,paid vehicle data provider
+Vehicle score lookup,plate,skip,yes,skip,credit or registry data you cannot rebuild
+IPVA lookup by plate,plate,skip,yes,skip,state data plus plate provider
+Local automotive consultant search,network,skip,yes,skip,their partner network
+Expert opinion,editorial,skip,yes,skip,their editorial content
+Basic Complete and Armored evaluations,evaluation,skip,yes,skip,proprietary valuation method and data
+Ad creation for sellers via WhatsApp,seller tools,skip,yes,skip,outside the chosen slice
+Full-screen chart and selectable time interval,history,should,yes,no,added in app version 3.1.62
+Compare several vehicles side by side,lookup,should,yes,no,added in 3.1.50
+Search history,lookup,should,yes,partial,"added in 3.1.46; web prototype only, sample data"
+State-based price radar,discovery,could,yes,no,added in 3.1.44; needs your own regional data
+Price forecast,history,could,yes,no,method unknown; only if you can build a model you can defend
+Market calculator min average max from listings,pricing,skip,yes,skip,needs classified listing data you do not own
+Pay per query credits with PIX,monetization,could,yes,no,seen in version history; check how credits are priced before copying
+Credit balance shown in the header,monetization,should,yes,no,seen on home screen
+Tools grid on home with See all,navigation,should,yes,no,seen on home screen
+Sales card for sellers (Card de Venda),seller tools,could,yes,no,seen in tools grid; behavior unconfirmed
+Partner insurance tile (Seguro Loovi),partners,skip,yes,skip,their affiliate deal; use your own partner or leave out
+Look up a price without creating an account,onboarding,must,no,partial,prototype works without an account; database allows signed-out reads (tested)
+Banner-only ads with no pop-ups or interstitials,monetization,must,no,no,fix: complaint about ads and pop-ups (thin evidence)
+Offline cache of the last viewed prices and favorites,reliability,should,no,no,fix: reports of the app freezing or not opening after updates (thin evidence)
+Show what is free and what is paid before purchase,monetization,should,no,no,fix: a paid feature stopped showing (thin evidence)

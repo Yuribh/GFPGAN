@@ -1,0 +1,5 @@
+{
+  "avoid": ["PrecifiCAR", "Precificar", "iFipe", "Itaquera", "Loovi", "mobilesolution", "IT Tech"],
+  "domains": ["precificar.app", "mobilesolutions.com.br", "itaquera.tech"],
+  "colors": ["#325e5d", "#417d7d"]
+}

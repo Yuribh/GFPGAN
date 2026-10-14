@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Régua: o preço FIPE, sem cadastro e sem pop-up</title>
+<meta name="description" content="Consulte o preço de carros, motos e caminhões pela tabela FIPE. Sem cadastro, sem pop-up.">
+<style>:root {
+  --color-bg: #f2f2f2;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f9f9f9;
+  --color-border: #e3e6ea;
+  --color-border-input: #868e98;
+  --color-text: #292929;
+  --color-text-muted: #5b6470;
+  --color-accent: #b5420c;
+  --color-on-accent: #ffffff;
+  --color-accent-soft: #fdeee3;
+  --color-danger: #c62f2f;
+  --color-success: #1f7a4d;
+  --color-warning: #8a5a00;
+  --font-sans: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --text-xs: 12px/16px;  --weight-xs: 500;
+  --text-sm: 14px/20px;  --weight-sm: 400;
+  --text-base: 16px/24px;  --weight-base: 400;
+  --text-lg: 20px/28px;  --weight-lg: 600;
+  --text-xl: 28px/34px;  --weight-xl: 700;
+  --text-display: 40px/44px;  --weight-display: 700;
+  --space-0: 0px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+  --shadow-card: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.10);
+  --shadow-pop: 0 12px 32px rgba(16,24,40,.16);
+  --motion-fast: 120ms;
+  --motion-base: 200ms;
+  --motion-ease: cubic-bezier(.2,.8,.2,1);
+}
+
+*{box-sizing:border-box;margin:0}
+body{background:var(--color-bg);color:var(--color-text);font:400 16px/24px var(--font-sans)}
+a{color:var(--color-accent)}
+a:focus-visible,button:focus-visible{outline:2px solid var(--color-accent);outline-offset:2px}
+.wrap{max-width:960px;margin:0 auto;padding:0 16px}
+header{padding:16px 0;font:700 20px/28px var(--font-sans)}
+.hero{display:grid;gap:32px;padding:24px 0 48px;align-items:center}
+h1{font:700 28px/34px var(--font-sans)}
+h2{font:700 28px/34px var(--font-sans);margin-bottom:16px}
+h3{font:600 20px/28px var(--font-sans);margin-bottom:4px}
+.lead{font-size:18px;line-height:28px;margin:16px 0 24px;color:var(--color-text-muted)}
+.btn{display:inline-flex;align-items:center;min-height:48px;padding:0 24px;border-radius:var(--radius-md);background:var(--color-accent);color:var(--color-on-accent);font-weight:600;text-decoration:none}
+.soon{margin-top:12px;font-size:14px;line-height:20px;color:var(--color-text-muted)}
+.shot{width:100%;max-width:360px;height:auto;border-radius:var(--radius-lg);box-shadow:var(--shadow-pop);justify-self:center}
+.caption{font-size:14px;line-height:20px;color:var(--color-text-muted);text-align:center;margin-top:8px}
+section{padding:32px 0}
+.band{background:var(--color-surface)}
+.grid{display:grid;gap:16px}
+.card{background:var(--color-surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-card);padding:20px}
+.band .card{background:var(--color-bg);box-shadow:none}
+.num{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:999px;background:var(--color-accent);color:var(--color-on-accent);font-weight:700;margin-bottom:8px}
+.muted{color:var(--color-text-muted)}
+.price{font:700 28px/34px var(--font-sans)}
+ul.plain{list-style:none;padding:0;display:grid;gap:8px;margin-top:12px}
+ul.plain li::before{content:"✓ ";color:var(--color-accent);font-weight:700}
+details{background:var(--color-surface);border-radius:var(--radius-md);padding:12px 16px;margin-bottom:8px;box-shadow:var(--shadow-card)}
+summary{font-weight:600;cursor:pointer;min-height:24px}
+details p{margin-top:8px;color:var(--color-text-muted)}
+footer{padding:32px 0 48px;font-size:14px;line-height:20px;color:var(--color-text-muted)}
+@media (min-width:760px){.hero{grid-template-columns:1.1fr .9fr}h1{font-size:40px;line-height:44px}.grid.three{grid-template-columns:repeat(3,1fr)}.grid.two{grid-template-columns:repeat(2,1fr)}.grid.five{grid-template-columns:repeat(2,1fr)}}
+</style></head>
+<body>
+<div class="wrap"><header>Régua</header></div>
+<main>
+<div class="wrap hero">
+  <div>
+    <h1>O preço FIPE, sem cadastro e sem pop-up.</h1>
+    <p class="lead">Escolha o veículo e veja o valor do mês na hora. Nada para criar, nada para fechar.</p>
+    <a class="btn" href="../prototype/dist/index.html">Ver o app funcionando</a>
+    <p class="soon">Em breve na Google Play e na App Store.</p>
+  </div>
+  <figure><img class="shot" src="assets/result.png" alt="Tela da Régua mostrando o preço de um veículo de exemplo, com a variação do mês e o gráfico de evolução"><figcaption class="caption">Dados de exemplo.</figcaption></figure>
+</div>
+
+<section class="band"><div class="wrap">
+  <h2>Você só queria um número</h2>
+  <div class="grid two">
+    <div class="card"><h3>Anúncios e pop-ups</h3><p class="muted">Muitos apps de consulta enchem a tela quando você só quer ver um preço.</p></div>
+    <div class="card"><h3>Cadastro para ver o valor</h3><p class="muted">Alguns passaram a pedir conta até para a consulta mais simples.</p></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <h2>Como funciona</h2>
+  <div class="grid three">
+    <div class="card"><span class="num">1</span><h3>Escolha o tipo</h3><p class="muted">Carro, moto ou caminhão.</p></div>
+    <div class="card"><span class="num">2</span><h3>Marca, modelo e ano</h3><p class="muted">Com busca em cada lista.</p></div>
+    <div class="card"><span class="num">3</span><h3>Veja o preço do mês</h3><p class="muted">E como ele mudou em relação ao mês anterior.</p></div>
+  </div>
+</div></section>
+
+<section class="band"><div class="wrap">
+  <h2>O que a Régua faz</h2>
+  <div class="grid two">
+    <div class="card"><h3>Sem cadastro</h3><p class="muted">Abriu, consultou.</p></div>
+    <div class="card"><h3>Sem pop-up</h3><p class="muted">Se houver anúncio, é um banner fixo, nunca no meio do caminho.</p></div>
+    <div class="card"><h3>Gráfico de evolução</h3><p class="muted">O preço mês a mês, com um resumo em texto.</p></div>
+    <div class="card"><h3>Favoritos e histórico</h3><p class="muted">Volte rápido aos veículos que importam.</p></div>
+    <div class="card"><h3>Compartilhe</h3><p class="muted">Mande o preço em uma mensagem.</p></div>
+  </div>
+</div></section>
+
+<section id="precos"><div class="wrap">
+  <h2>Preços</h2>
+  <div class="grid two">
+    <div class="card"><h3>Consultar</h3><p class="price">R$ 0</p><p class="muted">Para quem quer ver um preço.</p>
+      <ul class="plain"><li>Consulta por tipo, marca, modelo e ano</li><li>Gráfico de evolução</li><li>Favoritos neste aparelho</li><li>Um banner de anúncio, nenhum pop-up</li></ul></div>
+    <div class="card"><h3>Acompanhar (Plus)</h3><p class="price">R$ 9,90 <span class="muted" style="font:400 16px/24px var(--font-sans)">por mês</span></p><p class="muted">ou R$ 99 por ano, dois meses grátis.</p>
+      <ul class="plain"><li>Tudo do Consultar</li><li>Sem anúncios</li><li>Planejado: favoritos na sua conta e aviso quando a tabela do mês sair</li></ul></div>
+  </div>
+  <p class="soon">Preço de lançamento, sujeito a confirmação. Cancele quando quiser, direto no app ou na loja.</p>
+</div></section>
+
+<section class="band"><div class="wrap">
+  <h2>Perguntas</h2>
+  <details><summary>Preciso criar conta?</summary><p>Não, para consultar.</p></details>
+  <details><summary>De onde vêm os preços?</summary><p>Da tabela FIPE. A Régua não é afiliada à Fundação Instituto de Pesquisas Econômicas (FIPE).</p></details>
+  <details><summary>O preço da tabela é o preço de mercado?</summary><p>Nem sempre. É uma referência e pode variar com o estado, a versão e a conservação do veículo.</p></details>
+  <details><summary>Funciona para moto e caminhão?</summary><p>Sim.</p></details>
+  <details><summary>Tem consulta por placa?</summary><p>Não nesta versão.</p></details>
+  <details><summary>Quanto custa?</summary><p>Consultar é grátis. Quem quiser tirar os anúncios assina o Plus.</p></details>
+</div></section>
+
+<section><div class="wrap" style="text-align:center">
+  <h2>Consulte um preço agora</h2>
+  <a class="btn" href="../prototype/dist/index.html">Ver o app funcionando</a>
+</div></section>
+</main>
+<footer><div class="wrap">Régua. Os valores seguem a tabela FIPE e podem variar do preço praticado no mercado.</div></footer>
+</body></html>
