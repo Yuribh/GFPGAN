@@ -29,6 +29,8 @@ interface PlusState {
   purchase(id: string): Promise<PurchaseOutcome>;
   restore(): Promise<boolean>;
   manage(): Promise<void>;
+  /** RevenueCat's anonymous id for this install, so the server can check Plus itself (plate lookup limits) */
+  appUserId(): Promise<string | undefined>;
 }
 
 const Ctx = createContext<PlusState | null>(null);
@@ -111,10 +113,15 @@ export function PlusProvider({ children }: { children: ReactNode }) {
       : 'https://play.google.com/store/account/subscriptions');
   }, []);
 
+  const appUserId = useCallback(async () => {
+    if (!RC) return undefined;
+    try { return await RC.default.getAppUserID(); } catch { return undefined; }
+  }, []);
+
   const options = useMemo(() => packages?.map(p => ({ id: p.identifier, price: p.product.priceString, ...labelFor(p) })) ?? null, [packages]);
   const value = useMemo<PlusState>(() => ({
-    available: plusAvailable, isPlus, checking, options, loadOptions, purchase, restore, manage,
-  }), [isPlus, checking, options, loadOptions, purchase, restore, manage]);
+    available: plusAvailable, isPlus, checking, options, loadOptions, purchase, restore, manage, appUserId,
+  }), [isPlus, checking, options, loadOptions, purchase, restore, manage, appUserId]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 

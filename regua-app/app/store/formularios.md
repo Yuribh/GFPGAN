@@ -19,6 +19,8 @@ URL para pedido de exclusão: `https://yuribh.github.io/GFPGAN/privacidade.html`
 | Informações e desempenho do app › Diagnóstico | Sim | Não | Não | Análise; Funcionalidade do app |
 | Dispositivo ou outros IDs (ID de publicidade) | Sim | Sim (Google) | Não | Publicidade ou marketing; Análise; Prevenção contra fraudes, segurança e conformidade |
 | Informações financeiras › Histórico de compras (assinatura Plus) | Sim | Não | Sim (só quem assina) | Funcionalidade do app |
+| Outros tipos de dados › Outras ações / conteúdo (placa digitada na busca por placa) | Sim | Sim (fornecedor de consulta veicular) | Sim (só quem usa a busca por placa) | Funcionalidade do app |
+| Dispositivo ou outros IDs (código aleatório do app, só na busca por placa) | Sim | Não | Sim | Funcionalidade do app; Prevenção contra fraudes, segurança e conformidade |
 
 Não marque: informações pessoais (nome, e-mail, endereço, telefone), mensagens, fotos, áudio, arquivos, agenda, contatos, saúde, local exato.
 Observação: os dados de pagamento ficam com o Google Play, então "Informações de pagamento" não é coletado pelo app.
@@ -50,6 +52,7 @@ Todos abaixo: **Não vinculados à identidade do usuário**, **Não usados para 
 | Diagnóstico › Dados de falhas | Funcionalidade do app; Análises |
 | Diagnóstico › Dados de desempenho | Funcionalidade do app |
 | Compras › Histórico de compras | Funcionalidade do app |
+| Outros dados › Outros tipos de dados (placa digitada) | Funcionalidade do app |
 
 - **URL da política de privacidade:** `https://yuribh.github.io/GFPGAN/privacidade.html`
 - **URL de suporte:** `https://yuribh.github.io/GFPGAN/suporte.html`
@@ -68,6 +71,7 @@ Todos abaixo: **Não vinculados à identidade do usuário**, **Não usados para 
 ```
 A Régua não exige login: todas as funções estão disponíveis ao abrir o app.
 Para testar: toque em Carros, escolha uma marca, um modelo e um ano para ver o preço da tabela FIPE.
+Busca por placa: digite uma placa no campo "Buscar pela placa" (limite de 3 por dia no plano grátis). O app mostra apenas dados do veículo, nunca do proprietário.
 A assinatura Régua Plus (Sobre > Régua Plus) apenas remove o banner de anúncio; a consulta é sempre gratuita.
 Cancelamento: Sobre > Gerenciar ou cancelar assinatura abre a tela de assinaturas da loja.
 A Régua não é afiliada à Fundação Instituto de Pesquisas Econômicas (FIPE); exibimos os valores públicos da tabela como referência.

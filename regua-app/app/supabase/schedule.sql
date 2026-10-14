@@ -17,5 +17,8 @@ $$);
 -- monthly cleanup of usage counts older than a year (migration 0005)
 select cron.schedule('prune-app-events', '0 4 15 * *', $$ select prune_app_events(); $$);
 
+-- daily cleanup of plate lookup data: device counters after 7 days, cached plates after 90 (migration 0006)
+select cron.schedule('prune-plate-data', '30 4 * * *', $$ select prune_plate_data(); $$);
+
 -- to check: select * from cron.job_run_details order by start_time desc limit 20;
 -- to stop:  select cron.unschedule('ingest-fipe');

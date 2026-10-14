@@ -7,6 +7,7 @@ import { usingSampleData } from '../../src/data/index.ts';
 import { createTapGuard } from '../../src/logic/latest.ts';
 import { c, card, r, s, font, layout } from '../../src/theme.ts';
 import { AdBanner } from '../../src/services/ads';
+import { PlateSearch } from '../../src/ui/PlateSearch.tsx';
 
 const TYPES: { type: VehicleType; label: string; icon: keyof typeof MaterialCommunityIcons.glyphMap }[] = [
   { type: 'trucks', label: 'Caminhões', icon: 'truck-outline' },
@@ -35,6 +36,8 @@ export default function Home() {
             ))}
           </View>
         </View>
+
+        <PlateSearch />
 
         <Text style={[st.h2, { marginTop: s[5] }]} accessibilityRole="header">Ferramentas</Text>
         <View style={st.tools}>

@@ -2,7 +2,7 @@
 // No device id, no advertising id, no IP stored by us. The session id is random per app launch and never saved.
 // Rows go to the app_events table (migration 0005), which the anon key may insert into but never read.
 
-export const EVENTS = ['app_open', 'lookup_started', 'price_viewed', 'favorite_added', 'share', 'plus_viewed', 'plus_purchased'] as const;
+export const EVENTS = ['app_open', 'lookup_started', 'price_viewed', 'favorite_added', 'share', 'plus_viewed', 'plus_purchased', 'plate_lookup', 'plate_found'] as const;
 export type AppEvent = typeof EVENTS[number];
 
 export interface AnalyticsOptions {

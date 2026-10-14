@@ -76,7 +76,7 @@ insert into results select 'deleting A keeps search event anonymous', count(*) =
 
 \pset footer off
 select case when ok then 'PASS' else 'FAIL' end as result, name, coalesce(detail, '') as detail from results;
-select count(*) filter (where not ok) as failures from results \gset
+select count(*) filter (where not ok) > 0 as failures from results \gset
 \if :failures
   \echo FAILED
 \else

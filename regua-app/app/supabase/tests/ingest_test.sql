@@ -31,7 +31,7 @@ insert into results select 'no brand was written by the user', count(*) = 0, cou
 
 \pset footer off
 select case when ok then 'PASS' else 'FAIL' end as result, name, coalesce(detail, '') as detail from results;
-select count(*) filter (where not ok) as failures from results \gset
+select count(*) filter (where not ok) > 0 as failures from results \gset
 \if :failures
   \echo FAILED
 \else

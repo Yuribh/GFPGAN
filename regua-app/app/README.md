@@ -46,6 +46,7 @@ Antes:
 - `app/` telas (Expo Router): abas Home, Favoritos, Sobre; `pick` (marca, modelo, ano); `vehicle/[id]` (preço e gráfico); `history`.
 - `src/data/` dados: `supabase.ts` (real), `fake.ts` (exemplo), mesma interface.
 - `src/logic/` busca sem acento, proteção contra toque duplo e contra respostas atrasadas (testadas).
+- `app/plate.tsx` + `src/ui/PlateSearch.tsx` busca por placa; `server/plate/` e `supabase/functions/plate-lookup` (fornecedor, cache, limites).
 - `app/plus.tsx` assinatura Régua Plus. `src/services/` assinatura (RevenueCat), anúncio (AdMob), erros (Sentry), contagem anônima de uso.
 - `server/`, `supabase/` backend, migrações e funções (`supabase/schedule.sql` agenda a importação). `prototype/` protótipo web.
 - `landing/` site: página de venda, privacidade, termos, suporte (publicado no GitHub Pages).

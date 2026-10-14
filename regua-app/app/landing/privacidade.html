@@ -23,10 +23,13 @@
 <tr><td>Contagem anônima de uso: nome do evento (por exemplo “preço visto”), um código aleatório criado a cada vez que o app abre, sistema (Android ou iOS) e versão do app</td><td>Saber quantas consultas são feitas e se o app funciona bem</td><td>Nós, com armazenamento no Supabase</td><td>Esses dados não identificam você. Mesmo assim, se forem considerados pessoais: legítimo interesse (art. 7º, IX)</td></tr>
 <tr><td>Relatórios de erro: modelo do aparelho, versão do sistema e do app, descrição técnica do erro</td><td>Encontrar e corrigir falhas</td><td>Sentry (Functional Software, Inc.)</td><td>Legítimo interesse (art. 7º, IX)</td></tr>
 <tr><td>Anúncios (só no plano gratuito): identificador de publicidade do aparelho, endereço IP, informações do aparelho e interações com o anúncio</td><td>Exibir e medir o anúncio. Anúncios personalizados só com o seu consentimento</td><td>Google (AdMob). Veja <a href="https://policies.google.com/technologies/partner-sites?hl=pt-BR">como o Google usa os dados</a></td><td>Consentimento (art. 7º, I), pedido na primeira abertura, e legítimo interesse para anúncios não personalizados</td></tr>
+<tr><td>Placa digitada na busca por placa</td><td>Descobrir marca, modelo, ano e código FIPE do veículo</td><td>Enviada ao fornecedor de consulta veicular <strong class="todo">[nome do fornecedor]</strong>. Nós guardamos só um código irreversível da placa (não a placa), para não consultar duas vezes a mesma</td><td>Execução do serviço que você pediu (art. 7º, V)</td></tr>
+<tr><td>Código aleatório do aparelho (criado na primeira busca por placa)</td><td>Aplicar o limite diário de buscas por placa</td><td>Nós, no Supabase. Apagado após 7 dias</td><td>Legítimo interesse (art. 7º, IX)</td></tr>
 <tr><td>Assinatura Régua Plus: um código anônimo de cliente e o recibo da compra</td><td>Liberar o Plus e permitir restaurar a compra em outro aparelho</td><td>RevenueCat, Inc., Google Play e App Store</td><td>Execução de contrato (art. 7º, V)</td></tr>
 </table></div>
 <p><strong>Pagamentos:</strong> são feitos inteiramente pela Google Play ou pela App Store. Nós nunca vemos nem guardamos dados do seu cartão.</p>
 <p><strong>Consultas de preço:</strong> o app busca os preços no nosso banco de dados. Essas buscas não são associadas a você.</p>
+<p><strong>Busca por placa:</strong> a Régua não recebe nem mostra dados do proprietário (nome, CPF, endereço). O fornecedor devolve apenas dados do veículo.</p>
 
 <h2>O que não fazemos</h2>
 <ul>
@@ -41,6 +44,7 @@
 <h2>Por quanto tempo</h2>
 <ul>
 <li>Contagens de uso: até 12 meses, depois são apagadas.</li>
+<li>Resultado da busca por placa (marca, modelo, ano, código FIPE, ligado só ao código irreversível da placa): até 90 dias. Contagem diária por aparelho: 7 dias.</li>
 <li>Relatórios de erro: até 90 dias.</li>
 <li>Dados de assinatura: enquanto ela existir e pelo prazo exigido por lei.</li>
 <li>Dados de anúncios: conforme a política do Google.</li>

@@ -17,6 +17,7 @@ Siga na ordem. Cada passo diz onde colocar o que você criar.
 | App Android e iOS (Expo SDK 57), testado: 46 testes, 51 checagens de banco, tipos, bundles Android/iOS/web | `app/`, `src/` |
 | Ícone, ícone adaptativo do Android, tela de abertura, favicon, logo, imagem social | `assets/` (gerados por `scripts/make_icons.py`) |
 | Identificador do app: **`io.github.yuribh.regua`** (baseado no seu GitHub Pages, que é seu) | `app.json` |
+| **Busca por placa**: campo no início, cache por placa, limite de 3/dia grátis e 30/dia no Plus, teto diário de gastos; a placa nunca é guardada em texto | `app/plate.tsx`, `server/plate/`, `supabase/functions/plate-lookup`, `migrations/0006` |
 | Assinatura **Régua Plus** (remove anúncios): tela de planos, compra, restaurar, cancelar com um toque | `app/plus.tsx`, `src/services/plus.tsx` |
 | **Um banner** do AdMob no plano grátis, com pedido de consentimento (LGPD/GDPR); some para quem assina | `src/services/ads.tsx` |
 | **Relatórios de erro** (Sentry) e **contagem anônima de uso** (tabela `app_events`, sem dados pessoais) | `src/services/`, `supabase/migrations/0005_app_events.sql` |
@@ -55,6 +56,23 @@ Sem nenhuma chave, o app funciona com dados de exemplo, anúncio de teste do Goo
 6. Ative os backups diários do projeto (Database › Backups).
 7. Chaves no app (GitHub *Variables* e Expo *env*): `EXPO_PUBLIC_SUPABASE_URL` e `EXPO_PUBLIC_SUPABASE_ANON_KEY` (Project Settings › API).
 8. Números do lançamento: no SQL Editor, `select * from app_daily_metrics;`
+
+## 3b. Busca por placa (fornecedor pago)
+Cada consulta nova custa dinheiro ao fornecedor (preços vistos: perto de R$ 0,80–1,00 por consulta; placas repetidas vêm do cache, sem custo).
+1. Escolha um fornecedor de consulta **veicular** (só dados do veículo, sem dados do proprietário) que devolva o **código FIPE**.
+   Exemplos encontrados: Consultar Placa, WebXcar, FipeAPI, Direct Data. Peça por escrito: origem dos dados, permissão de uso em app, LGPD, preço.
+2. Rode a migração `0006_plate_lookup.sql` (se ainda não rodou) e publique a função:
+   ```
+   npx supabase secrets set PLATE_API_URL='https://.../{plate}' PLATE_API_TOKEN=... PLATE_API_AUTH=bearer \
+     PLATE_HASH_PEPPER=$(openssl rand -hex 32) PLATE_GLOBAL_DAILY=300 REVENUECAT_SECRET_KEY=...
+   npx supabase functions deploy plate-lookup
+   ```
+   `PLATE_API_AUTH` é `bearer`, `header:Nome-Do-Header` ou `query:nome_do_parametro`, conforme a documentação do fornecedor.
+   `PLATE_GLOBAL_DAILY` é o teto de consultas pagas por dia (300 ≈ R$ 300/dia no pior caso); ajuste ao seu orçamento.
+3. **Me mande um exemplo de resposta do fornecedor** (com dados de teste): o leitor da resposta (`server/plate/provider.ts`)
+   entende os formatos comuns, mas vale confirmar os nomes dos campos e adicionar um teste com o formato real.
+4. Variável do GitHub `REGUA_PLATE_PROVIDER` com o nome do fornecedor: preenche a política de privacidade.
+5. Sem fornecedor configurado, a busca por placa responde "indisponível agora" e oferece a busca por marca e modelo.
 
 ## 4. Anúncios (AdMob)
 1. Crie a conta em https://admob.google.com e adicione o app (Android; depois iOS).

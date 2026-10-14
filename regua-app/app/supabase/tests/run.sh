@@ -16,7 +16,7 @@ run "psql -q -v ON_ERROR_STOP=1 -d $DB -f $TMP/supabase_stub.sql" 2>/dev/null ||
 for m in "$TMP"/0*.sql; do run "psql -q -v ON_ERROR_STOP=1 -d $DB -f $m"; done
 run "psql -q -v ON_ERROR_STOP=1 -d $DB -f $TMP/after_migrate.sql"
 status=0
-for t in rls_test ingest_test billing_test events_test; do
+for t in rls_test ingest_test billing_test events_test plate_test; do
   echo "== $t"
   run "psql -X -d $DB -f $TMP/$t.sql" | tee "$TMP/$t.out"
   grep -q "ALL PASSED" "$TMP/$t.out" || status=1

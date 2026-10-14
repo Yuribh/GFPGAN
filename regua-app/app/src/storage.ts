@@ -32,3 +32,27 @@ export const history = {
     await writeList('hist', [id, ...list].slice(0, 30));
   },
 };
+
+// Random id for this install, created on first use. Sent only with plate lookups so the server can apply the
+// per-device daily limit. Not linked to a person; reinstalling the app creates a new one.
+let installIdCache: string | null = null;
+export async function installId(): Promise<string> {
+  if (installIdCache) return installIdCache;
+  try {
+    const saved = await AsyncStorage.getItem('install_id');
+    if (saved && /^[0-9a-f-]{36}$/.test(saved)) return (installIdCache = saved);
+  } catch { /* fall through and create one */ }
+  const id = randomUuid();
+  installIdCache = id;
+  try { await AsyncStorage.setItem('install_id', id); } catch { /* keep it for this session */ }
+  return id;
+}
+
+function randomUuid(): string {
+  const c = globalThis.crypto as Crypto | undefined;
+  if (c?.randomUUID) return c.randomUUID();
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, ch => {
+    const r = (Math.random() * 16) | 0;
+    return (ch === 'x' ? r : (r & 0x3) | 0x8).toString(16);
+  });
+}
