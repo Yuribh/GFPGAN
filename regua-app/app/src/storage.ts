@@ -26,6 +26,22 @@ export const favorites = {
   },
 };
 
+// Paid history reports stay on the device (the user paid for them), plus a purchase waiting for its report
+// (bought, but the server failed): it is retried without paying again.
+export interface SavedReport { plate: string; savedAt: string; report: unknown }
+async function readJson<T>(key: string, fallback: T): Promise<T> {
+  try { const raw = await AsyncStorage.getItem(key); return raw ? (JSON.parse(raw) as T) : fallback; } catch { return fallback; }
+}
+async function writeJson(key: string, value: unknown) { try { await AsyncStorage.setItem(key, JSON.stringify(value)); } catch { /* keep going */ } }
+export const reports = {
+  list: () => readJson<SavedReport[]>('reports', []),
+  async save(r: SavedReport) { const all = (await reports.list()).filter(x => x.plate !== r.plate); await writeJson('reports', [r, ...all].slice(0, 50)); },
+};
+export const pendingPurchase = {
+  get: () => readJson<{ plate: string; transactionId: string } | null>('pending_history', null),
+  set: (p: { plate: string; transactionId: string } | null) => writeJson('pending_history', p),
+};
+
 // vehicles picked for the comparison screen (up to 3, see src/logic/compare.ts)
 export const compareList = {
   list: () => readList('compare'),

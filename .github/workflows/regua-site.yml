@@ -32,6 +32,7 @@ jobs:
           RESPONSAVEL: ${{ vars.REGUA_RESPONSAVEL }}
           EMAIL: ${{ vars.REGUA_EMAIL }}
           PLATE_PROVIDER: ${{ vars.REGUA_PLATE_PROVIDER }}
+          HISTORY_PROVIDER: ${{ vars.REGUA_HISTORY_PROVIDER }}
         run: |
           (cd prototype && node build.mjs)
           mkdir -p _site/prototipo
@@ -42,6 +43,7 @@ jobs:
           for f in _site/privacidade.html _site/termos.html _site/suporte.html; do
             if [ -n "$RESPONSAVEL" ]; then sed -i "s#\[nome completo ou razão social e CPF/CNPJ\]#${RESPONSAVEL//#/\\#}#g" "$f"; fi
             if [ -n "$EMAIL" ]; then sed -i "s#\[e-mail de suporte\]#<a href=\"mailto:$EMAIL\">$EMAIL</a>#g; s#\[e-mail\]#<a href=\"mailto:$EMAIL\">$EMAIL</a>#g" "$f"; fi
+            if [ -n "$HISTORY_PROVIDER" ]; then sed -i "s#<strong class=\"todo\">\[nome do fornecedor de histórico\]</strong>#<strong>${HISTORY_PROVIDER//#/\\#}</strong>#g" "$f"; fi
             if [ -n "$PLATE_PROVIDER" ]; then sed -i "s#<strong class=\"todo\">\[nome do fornecedor\]</strong>#<strong>${PLATE_PROVIDER//#/\\#}</strong>#g" "$f"; fi
             if [ -n "$RESPONSAVEL" ] && [ -n "$EMAIL" ]; then sed -i 's/ class="todo"//g' "$f"; fi
           done

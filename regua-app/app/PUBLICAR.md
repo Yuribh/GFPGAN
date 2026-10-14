@@ -17,6 +17,7 @@ Siga na ordem. Cada passo diz onde colocar o que você criar.
 | App Android e iOS (Expo SDK 57), testado: 46 testes, 51 checagens de banco, tipos, bundles Android/iOS/web | `app/`, `src/` |
 | Ícone, ícone adaptativo do Android, tela de abertura, favicon, logo, imagem social | `assets/` (gerados por `scripts/make_icons.py`) |
 | Identificador do app: **`io.github.yuribh.regua`** (baseado no seu GitHub Pages, que é seu) | `app.json` |
+| **Histórico do veículo** (leilão, roubo/furto, sinistro, gravame, restrições, recall): relatório pago por placa, compra avulsa na loja, conferida no servidor e usada uma só vez; se falhar, a compra fica guardada para tentar de novo | `app/vehicle-history.tsx`, `server/history/`, `supabase/functions/vehicle-history`, `migrations/0008` |
 | **Consultor** com IA (Claude): dúvidas de compra e venda com os dados FIPE do veículo; 5 perguntas/dia grátis, 50 no Plus, teto diário de gasto | `app/advisor.tsx`, `server/advisor/`, `supabase/functions/advisor`, `migrations/0007` |
 | **Ferramentas**: comparar até 3 veículos (com gráfico), card de venda em imagem para compartilhar, relatório de preço em PDF | `app/compare.tsx`, `app/sale-card.tsx`, `app/report.tsx` |
 | **Busca por placa**: campo no início, cache por placa, limite de 3/dia grátis e 30/dia no Plus, teto diário de gastos; a placa nunca é guardada em texto | `app/plate.tsx`, `server/plate/`, `supabase/functions/plate-lookup`, `migrations/0006` |
@@ -85,6 +86,18 @@ Cada consulta nova custa dinheiro ao fornecedor (preços vistos: perto de R$ 0,8
    ```
 3. Custo: cada pergunta usa o modelo Claude Opus 5.5 com esforço baixo e respostas curtas. `ADVISOR_GLOBAL_DAILY` é o teto de perguntas por dia no app todo; ajuste ao orçamento e acompanhe o gasto no painel da Anthropic.
 4. Sem a chave, o Consultor responde "indisponível agora".
+
+## 3e. Histórico do veículo (relatório pago)
+1. Contrate um fornecedor de **dados veiculares** com API (leilão, roubo/furto, sinistro, gravame, restrições). Exemplo que menciona API: Concar. Peça por escrito: fontes de cada item (Renajud, SNG etc.), preço por consulta, LGPD e permissão de revenda em app.
+2. Crie o produto consumível `historico_veicular` nas lojas e importe no RevenueCat (`store/formularios.md`). O preço é definido na loja.
+3. Rode a migração `0008_vehicle_history.sql` e publique a função:
+   ```
+   npx supabase secrets set HISTORY_API_URL='https://.../{plate}' HISTORY_API_TOKEN=... HISTORY_API_AUTH=bearer
+   npx supabase functions deploy vehicle-history
+   ```
+   Ela usa os mesmos `PLATE_HASH_PEPPER` e `REVENUECAT_SECRET_KEY` da busca por placa.
+4. **Me mande um exemplo de resposta do fornecedor** para eu confirmar os campos e adicionar um teste com ele.
+5. Variável do GitHub `REGUA_HISTORY_PROVIDER` com o nome do fornecedor (preenche a política de privacidade).
 
 ## 3d. Cotar seguro (opcional)
 Se fechar parceria com uma seguradora ou corretora, coloque o link (https) em `EXPO_PUBLIC_INSURANCE_URL` e o nome do botão em `EXPO_PUBLIC_INSURANCE_LABEL`. Sem isso, a ferramenta não aparece.

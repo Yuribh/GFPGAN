@@ -46,6 +46,7 @@ Antes:
 - `app/` telas (Expo Router): abas Home, Favoritos, Sobre; `pick` (marca, modelo, ano); `vehicle/[id]` (preço e gráfico); `history`.
 - `src/data/` dados: `supabase.ts` (real), `fake.ts` (exemplo), mesma interface.
 - `src/logic/` busca sem acento, proteção contra toque duplo e contra respostas atrasadas (testadas).
+- Histórico do veículo (pago): `app/vehicle-history.tsx`; servidor em `server/history/` e `supabase/functions/vehicle-history`.
 - Consultor: `app/advisor.tsx`; servidor em `server/advisor/` (prompt, regras, adaptador do Claude) e `supabase/functions/advisor`.
 - Ferramentas: `app/compare.tsx` (comparar até 3), `app/sale-card.tsx` (card de venda em imagem), `app/report.tsx` (relatório em PDF), `app/choose.tsx` (escolher o veículo); lógica testada em `src/logic/compare.ts`, `saleCard.ts`, `report.ts`.
 - `app/plate.tsx` + `src/ui/PlateSearch.tsx` busca por placa; `server/plate/` e `supabase/functions/plate-lookup` (fornecedor, cache, limites).

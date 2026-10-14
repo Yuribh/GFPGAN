@@ -18,8 +18,8 @@ URL para pedido de exclusão: `https://yuribh.github.io/GFPGAN/privacidade.html`
 | Informações e desempenho do app › Registros de falhas | Sim | Não | Não | Análise; Funcionalidade do app |
 | Informações e desempenho do app › Diagnóstico | Sim | Não | Não | Análise; Funcionalidade do app |
 | Dispositivo ou outros IDs (ID de publicidade) | Sim | Sim (Google) | Não | Publicidade ou marketing; Análise; Prevenção contra fraudes, segurança e conformidade |
-| Informações financeiras › Histórico de compras (assinatura Plus) | Sim | Não | Sim (só quem assina) | Funcionalidade do app |
-| Outros tipos de dados › Outras ações / conteúdo (placa digitada na busca por placa) | Sim | Sim (fornecedor de consulta veicular) | Sim (só quem usa a busca por placa) | Funcionalidade do app |
+| Informações financeiras › Histórico de compras (assinatura Plus e relatórios de histórico) | Sim | Não | Sim (só quem compra) | Funcionalidade do app |
+| Outros tipos de dados › Outras ações / conteúdo (placa digitada na busca por placa e no relatório de histórico) | Sim | Sim (fornecedores de consulta veicular) | Sim (só quem usa a busca por placa) | Funcionalidade do app |
 | Mensagens › Outras mensagens no app (perguntas ao Consultor) | Sim | Sim (Anthropic, para gerar a resposta) | Sim (só quem usa o Consultor) | Funcionalidade do app |
 | Dispositivo ou outros IDs (código aleatório do app, só na busca por placa) | Sim | Não | Sim | Funcionalidade do app; Prevenção contra fraudes, segurança e conformidade |
 
@@ -60,6 +60,12 @@ Todos abaixo: **Não vinculados à identidade do usuário**, **Não usados para 
 - **URL de suporte:** `https://yuribh.github.io/GFPGAN/suporte.html`
 - **Classificação etária:** responda "Nenhum" para todos os conteúdos; sem acesso irrestrito à web; sem jogos de azar. Resultado esperado: **4+**.
 - **Criptografia (export compliance):** já respondido no app (`usesNonExemptEncryption: false`, só HTTPS).
+
+## Compra avulsa: relatório de histórico (as duas lojas)
+
+- Produto **consumível** (Google Play: produto no app, "consumível"; App Store: "Consumable") com o id **`historico_veicular`**. Preço sugerido: entre o custo do fornecedor e o que outros apps cobram (vimos R$ 10 a R$ 65 por consulta em outubro de 2026).
+- No RevenueCat, importe o produto (não precisa de entitlement). O servidor confere a compra pelo id da transação.
+- Nome: "Relatório de histórico do veículo". Descrição: "Leilão, roubo ou furto, sinistro, financiamento, restrições e recall de uma placa."
 
 ## Assinaturas (as duas lojas)
 

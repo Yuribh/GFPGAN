@@ -23,5 +23,8 @@ select cron.schedule('prune-plate-data', '30 4 * * *', $$ select prune_plate_dat
 -- daily cleanup of advisor counters (migration 0007)
 select cron.schedule('prune-feature-usage', '40 4 * * *', $$ select prune_feature_usage(); $$);
 
+-- daily cleanup of cached history reports older than 7 days (migration 0008)
+select cron.schedule('prune-history-cache', '50 4 * * *', $$ select prune_history_cache(); $$);
+
 -- to check: select * from cron.job_run_details order by start_time desc limit 20;
 -- to stop:  select cron.unschedule('ingest-fipe');

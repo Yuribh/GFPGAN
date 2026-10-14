@@ -50,6 +50,7 @@ export default function Home() {
           <Tool icon="tag" label="Card de venda" onPress={() => guard.take() && router.push({ pathname: '/choose', params: { then: 'card' } })} />
           <Tool icon="file-text" label="Relatório" onPress={() => guard.take() && router.push({ pathname: '/choose', params: { then: 'report' } })} />
           <Tool icon="message-circle" label="Consultor" onPress={() => guard.take() && router.push('/advisor')} />
+          <Tool icon="clipboard" label="Histórico do veículo" onPress={() => guard.take() && router.push('/vehicle-history')} />
           {insurance ? <InsuranceTool url={insurance.url} label={insurance.label} /> : null}
         </View>
 

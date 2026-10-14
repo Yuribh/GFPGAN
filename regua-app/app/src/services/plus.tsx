@@ -31,6 +31,10 @@ interface PlusState {
   manage(): Promise<void>;
   /** RevenueCat's anonymous id for this install, so the server can check Plus itself (plate lookup limits) */
   appUserId(): Promise<string | undefined>;
+  /** store price of a one-time product (e.g. the history report), null when unavailable */
+  productPrice(productId: string): Promise<string | null>;
+  /** buys a one-time product; the transaction id is what the server checks */
+  buyProduct(productId: string): Promise<{ status: 'purchased'; transactionId: string } | { status: 'cancelled' | 'failed' }>;
 }
 
 const Ctx = createContext<PlusState | null>(null);
@@ -118,10 +122,32 @@ export function PlusProvider({ children }: { children: ReactNode }) {
     try { return await RC.default.getAppUserID(); } catch { return undefined; }
   }, []);
 
+  const productPrice = useCallback(async (productId: string) => {
+    if (!RC) return null;
+    try {
+      const [p] = await RC.default.getProducts([productId], RC.PRODUCT_CATEGORY.NON_SUBSCRIPTION);
+      return p?.priceString ?? null;
+    } catch (e) { reportError(e); return null; }
+  }, []);
+
+  const buyProduct = useCallback(async (productId: string) => {
+    if (!RC) return { status: 'failed' as const };
+    try {
+      const [p] = await RC.default.getProducts([productId], RC.PRODUCT_CATEGORY.NON_SUBSCRIPTION);
+      if (!p) return { status: 'failed' as const };
+      const { transaction } = await RC.default.purchaseStoreProduct(p);
+      return { status: 'purchased' as const, transactionId: transaction.transactionIdentifier };
+    } catch (e) {
+      if ((e as { userCancelled?: boolean }).userCancelled) return { status: 'cancelled' as const };
+      reportError(e);
+      return { status: 'failed' as const };
+    }
+  }, []);
+
   const options = useMemo(() => packages?.map(p => ({ id: p.identifier, price: p.product.priceString, ...labelFor(p) })) ?? null, [packages]);
   const value = useMemo<PlusState>(() => ({
-    available: plusAvailable, isPlus, checking, options, loadOptions, purchase, restore, manage, appUserId,
-  }), [isPlus, checking, options, loadOptions, purchase, restore, manage, appUserId]);
+    available: plusAvailable, isPlus, checking, options, loadOptions, purchase, restore, manage, appUserId, productPrice, buyProduct,
+  }), [isPlus, checking, options, loadOptions, purchase, restore, manage, appUserId, productPrice, buyProduct]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
