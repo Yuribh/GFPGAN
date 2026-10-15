@@ -18,6 +18,15 @@ if (!v) throw new Error('no price');
 const brl = (c: number) => (c / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 console.log(`${v.brand.name} ${v.model.name} ${v.year.modelYear} (FIPE ${v.year.fipeCode}): ${brl(v.latest.priceCents)} in ${v.latest.referenceMonth}`);
 console.log(`history: ${v.history.map(p => `${p.referenceMonth} ${brl(p.priceCents)}`).join(' | ')}`);
+// what the API answers for each of the last 13 tables (status and month), to see why a month is missing
+const base = 'https://fipe.parallelum.com.br/api/v2';
+const refs = (await (await fetch(`${base}/references`)).json() as { code: string; month: string }[]).sort((a, b) => Number(b.code) - Number(a.code));
+console.log(`references: ${refs.length}, newest ${refs[0]?.code} ${refs[0]?.month}, oldest ${refs.at(-1)?.code} ${refs.at(-1)?.month}`);
+for (const r of refs.slice(0, 13)) {
+  const res = await fetch(`${base}/cars/brands/56/models/9984/years/2025-6?reference=${r.code}`);
+  const body = await res.text();
+  console.log(`  ref ${r.code} (${r.month}): HTTP ${res.status} ${res.headers.get('x-ratelimit-remaining') ?? ''} ${body.slice(0, 140)}`);
+}
 for (const m of [6, 12]) {
   const d = changeSince(v.history, m);
   console.log(`${m} months: ${d ? `${d.from.referenceMonth} ${brl(d.from.priceCents)} -> ${brl(v.latest.priceCents)} (${d.percent.toFixed(2)}%)` : 'missing'}`);
