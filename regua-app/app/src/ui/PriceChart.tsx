@@ -2,11 +2,12 @@ import { View, Text } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 import type { PricePoint } from '../data/types.ts';
 import { formatBRL, formatMonth, formatPercent } from '../format.ts';
+import { pointsSince } from '../logic/evolution.ts';
 import { c, s, font } from '../theme.ts';
 
 /** Monthly line chart with a text summary for screen readers (F02-E2). One month shows a note instead (F02-E1). */
 export function PriceChart({ points, months, width }: { points: PricePoint[]; months: number; width: number }) {
-  const pts = points.slice(-months);
+  const pts = pointsSince(points, months);
   if (pts.length === 0) return null;
   if (pts.length < 2) {
     return <Text style={{ color: c.muted, fontSize: font.sm.fontSize }}>Só há um mês de dados para este veículo. O gráfico aparece quando houver mais meses.</Text>;

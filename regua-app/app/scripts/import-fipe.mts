@@ -1,13 +1,13 @@
 // Imports the FIPE table into the database: the newest month first, then older months for the price history.
 // Resumable: stops cleanly at --max-minutes and continues where it left off on the next run.
-// Usage: DATABASE_URL=postgres://... FIPE_API_TOKEN=... node scripts/import-fipe.mts --months 12 --max-minutes 330 --rpm 60 [--budget 900]
+// Usage: DATABASE_URL=postgres://... FIPE_API_TOKEN=... node scripts/import-fipe.mts --months 13 --max-minutes 330 --rpm 60 [--budget 900]
 import pg from 'pg';
 import { createFipeProvider } from '../server/fipe/provider.ts';
 import { runIngestion } from '../server/fipe/ingest.ts';
 import { createPgStore, throttledFetch } from '../server/fipe/pg-store.ts';
 
 const arg = (name: string, d: number) => { const i = process.argv.indexOf(`--${name}`); const n = i > 0 ? Number(process.argv[i + 1]) : NaN; return Number.isFinite(n) && n > 0 ? n : d; };
-const months = arg('months', 12);
+const months = arg('months', 13);   // this month and the 12 before
 const maxMinutes = arg('max-minutes', 330);
 const rpm = arg('rpm', Number(process.env.FIPE_REQUESTS_PER_MINUTE) || 60);
 // optional cap on requests per run (the free FIPE plan allows about 1,000 a day); 0 or absent = no cap

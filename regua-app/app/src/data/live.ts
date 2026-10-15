@@ -58,7 +58,7 @@ export function parseYear(y: CodeName): { modelYear: number; fuel: string } {
 export function createLiveRepository(opts: LiveRepoOptions = {}): LiveRepository {
   const base = (opts.baseUrl ?? 'https://fipe.parallelum.com.br/api/v2').replace(/\/$/, '');
   const f: typeof fetch = opts.fetchImpl ?? ((input, init) => fetch(input, init));   // global looked up per call
-  const historyMonths = opts.historyMonths ?? 6;
+  const historyMonths = opts.historyMonths ?? 13;   // this month and the 12 before: the 6- and 12-month evolution
   const cache = new Map<string, Promise<unknown>>();
   const now = opts.now ?? Date.now;
 
@@ -135,9 +135,9 @@ export function createLiveRepository(opts: LiveRepoOptions = {}): LiveRepository
       const recent = (refs ?? []).slice().sort((a, b) => Number(b.code) - Number(a.code)).slice(0, historyMonths);
       const answers: (Vehicle | null)[] = [];
       if (recent.length === 0) answers.push(await get<Vehicle>(path, true));
-      // a few at a time, to stay under the API's per-minute limit
-      for (let i = 0; i < recent.length; i += 3) {
-        const batch = recent.slice(i, i + 3).map((r, j) => get<Vehicle>(`${path}?reference=${r.code}`, true)
+      // a few at a time, to stay under the API's per-minute limit (only the first visit: past months are kept on the phone)
+      for (let i = 0; i < recent.length; i += 4) {
+        const batch = recent.slice(i, i + 4).map((r, j) => get<Vehicle>(`${path}?reference=${r.code}`, true)
           .catch(e => { if (i + j === 0) throw e; return null; }));   // the latest month must load; older ones may fail
         answers.push(...await Promise.all(batch));
       }

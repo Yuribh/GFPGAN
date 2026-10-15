@@ -9,6 +9,7 @@ import { formatBRL, formatModelYear, formatMonth, formatPercent } from '../../sr
 import { compareList, favorites, history } from '../../src/storage.ts';
 import { Button, Header, Loading, Message } from '../../src/ui/kit.tsx';
 import { PriceChart } from '../../src/ui/PriceChart.tsx';
+import { changeSince } from '../../src/logic/evolution.ts';
 import { c, card, r, s, font, layout } from '../../src/theme.ts';
 import { track } from '../../src/services/track.ts';
 
@@ -94,6 +95,17 @@ export default function Vehicle() {
             ))}
           </View>
           <PriceChart points={v.history} months={months} width={width - 2 * layout['screen-gutter'] - 2 * s[4]} />
+          {[6, 12].map(m => {
+            const d = changeSince(v.history, m);
+            if (!d) return null;
+            const word = d.cents > 0 ? 'Subiu' : d.cents < 0 ? 'Caiu' : 'Igual';
+            return (
+              <View key={m} style={st.meta} accessible accessibilityLabel={`Em ${m} meses: ${word.toLowerCase()} ${formatPercent(Math.abs(d.percent)).replace(/^\+/, '')}. Há ${m} meses valia ${formatBRL(d.from.priceCents)}.`}>
+                <Text style={[st.muted, { flexShrink: 1, marginRight: s[2] }]}>Em {m} meses ({formatMonth(d.from.referenceMonth)}: {formatBRL(d.from.priceCents)})</Text>
+                <Text style={st.metaValue}>{formatPercent(d.percent)}</Text>
+              </View>
+            );
+          })}
         </View>
         {usingSampleData ? <Text style={[st.muted, { marginTop: s[4] }]}>Dados de exemplo, não são valores reais da tabela FIPE.</Text> : null}
       </ScrollView>

@@ -11,8 +11,8 @@ on:
   workflow_dispatch:
     inputs:
       months:
-        description: 'how many months to keep (newest first)'
-        default: '12'
+        description: 'how many months to keep, newest first (13 = this month and the 12 before)'
+        default: '13'
       max_minutes:
         description: 'stop after this many minutes (the next run resumes)'
         default: '330'
@@ -77,4 +77,4 @@ jobs:
         run: node scripts/migrate.mts
       - name: Import the FIPE table
         if: steps.cfg.outputs.ready == 'true'
-        run: node scripts/import-fipe.mts --months "${{ inputs.months || '12' }}" --max-minutes "${{ inputs.max_minutes || '330' }}" --rpm 60
+        run: node scripts/import-fipe.mts --months "${{ inputs.months || '13' }}" --max-minutes "${{ inputs.max_minutes || '330' }}" --rpm 60

@@ -67,7 +67,7 @@ O jeito mais simples: o **GitHub Actions** cria as tabelas e importa a tabela FI
 8. Ative os backups diários (Database › Backups). Para conferir: no SQL Editor, `select count(*) from price_points;`
 
 Alternativa sem GitHub: no computador, `DATABASE_URL=... node scripts/migrate.mts` e
-`DATABASE_URL=... FIPE_API_TOKEN=... node scripts/import-fipe.mts --months 12`.
+`DATABASE_URL=... FIPE_API_TOKEN=... node scripts/import-fipe.mts --months 13`.
 
 **As funções do Supabase (passos 3b, 3c, 3e)** e o `supabase/schedule.sql` continuam valendo para placa, consultor e
 histórico. A função `ingest-fipe` é uma alternativa ao import pelo GitHub; não precisa das duas.
