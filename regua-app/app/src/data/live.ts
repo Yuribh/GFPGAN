@@ -7,7 +7,17 @@ import { rankMatches, type CatalogMatch } from '../../server/plate/lookup.ts';
 import type { Brand, FipeRepository, Model, ModelYear, PricePoint, VehicleType } from './types.ts';
 import { buildVehicleResult } from './vehicle.ts';
 
-export interface LiveRepoOptions { baseUrl?: string; fetchImpl?: typeof fetch; historyMonths?: number }
+/** where answers are kept between app launches (AsyncStorage in the app) */
+export interface KeyValueStore { get(key: string): Promise<string | null>; set(key: string, value: string): Promise<void> }
+export interface LiveRepoOptions { baseUrl?: string; fetchImpl?: typeof fetch; historyMonths?: number; persist?: KeyValueStore; now?: () => number }
+
+const DAY = 86_400_000;
+/** how long a saved answer is used before asking again. A month's price never changes once published. */
+export function maxAge(path: string): number {
+  if (path.includes('?reference=')) return Infinity;
+  if (path === '/references') return DAY / 2;        // a new month shows up once a month
+  return 7 * DAY;                                     // brand, model and year lists
+}
 
 type CodeName = { code: string; name: string };
 type Reference = { code: string; month: string };
@@ -50,6 +60,7 @@ export function createLiveRepository(opts: LiveRepoOptions = {}): LiveRepository
   const f: typeof fetch = opts.fetchImpl ?? ((input, init) => fetch(input, init));   // global looked up per call
   const historyMonths = opts.historyMonths ?? 6;
   const cache = new Map<string, Promise<unknown>>();
+  const now = opts.now ?? Date.now;
 
   async function load<T>(path: string, allow404 = false): Promise<T | null> {
     for (let attempt = 0; ; attempt++) {
@@ -60,11 +71,33 @@ export function createLiveRepository(opts: LiveRepoOptions = {}): LiveRepository
       throw new Error(res.status === 429 ? 'Muitas consultas seguidas. Tente de novo em alguns minutos.' : `Não foi possível carregar (${res.status})`);
     }
   }
+  // saved answers spare the free API quota and work offline; when the network fails, the last known answer is used
+  async function loadSaved<T>(path: string, allow404: boolean): Promise<T | null> {
+    const store = opts.persist;
+    if (!store) return load<T>(path, allow404);
+    const key = 'fipe:' + path;
+    let stale: { t: number; v: T } | null = null;
+    try {
+      const raw = await store.get(key);
+      if (raw) { const saved = JSON.parse(raw) as { t: number; v: T }; if (now() - saved.t < maxAge(path)) return saved.v; stale = saved; }
+    } catch { /* unreadable: ask the API */ }
+    try {
+      const v = await load<T>(path, allow404);
+      if (v != null) {
+        const raw = JSON.stringify({ t: now(), v });
+        if (raw.length < 200_000) store.set(key, raw).catch(() => {});
+      }
+      return v;
+    } catch (e) {
+      if (stale) return stale.v;
+      throw e;
+    }
+  }
   // remembers answers for the session; a failed call is forgotten so it can be retried
   function get<T>(path: string, allow404 = false): Promise<T | null> {
     let p = cache.get(path) as Promise<T | null> | undefined;
     if (!p) {
-      p = load<T>(path, allow404);
+      p = loadSaved<T>(path, allow404);
       cache.set(path, p);
       p.catch(() => cache.delete(path));
     }

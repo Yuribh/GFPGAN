@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { withLiveIds } from '../src/data/index.ts';
+import { withLiveIds } from '../src/data/route.ts';
+import { createLiveRepository } from '../src/data/live.ts';
 import type { FipeRepository } from '../src/data/types.ts';
 
 test('with Supabase, ids from the FIPE API (plate lookups) still open; catalog ids go to Supabase', async () => {
@@ -12,7 +13,7 @@ test('with Supabase, ids from the FIPE API (plate lookups) still open; catalog i
   const realFetch = globalThis.fetch;
   globalThis.fetch = (async () => new Response('{}', { status: 404 })) as typeof fetch;
   try {
-    const repo = withLiveIds(base);
+    const repo = withLiveIds(base, createLiveRepository());
     await repo.getVehicle('3f1c2a9e-0000-4000-8000-000000000000');
     assert.equal(await repo.getVehicle('fipe:cars:002182-2:2025-6'), null);   // live repository (API says 404 here)
     assert.deepEqual(seen, ['3f1c2a9e-0000-4000-8000-000000000000']);

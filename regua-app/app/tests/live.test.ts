@@ -99,3 +99,38 @@ test('plate FIPE codes -> versions by FIPE code, the plate year first, and their
   assert.equal(parseFipeId('fipe:boats:500001-1:2010-3'), null);
   assert.ok(isLiveId('fipe:cars:002182-2:2025-6') && isLiveId('cars:56:9984:2025-6') && !isLiveId('3f1c2a9e-0000-4000-8000-000000000000'));
 });
+
+test('answers saved on the phone: reused after a restart, refreshed when old, used offline', async () => {
+  const saved = new Map<string, string>();
+  const persist = { get: async (k: string) => saved.get(k) ?? null, set: async (k: string, v: string) => { saved.set(k, v); } };
+  let t = Date.parse('2026-10-14T12:00:00Z');
+  const first = api();
+  const v1 = await createLiveRepository({ fetchImpl: first.fetchImpl, persist, now: () => t }).getVehicle('cars:56:9984:2025-6');
+  assert.equal(v1?.latest.priceCents, 17_364_500);
+  assert.ok(saved.has('fipe:/references') && saved.has('fipe:/cars/brands/56/models/9984/years/2025-6?reference=330'));
+
+  // app restarted an hour later: nothing asked again except the month that failed before
+  const second = api();
+  const v2 = await createLiveRepository({ fetchImpl: second.fetchImpl, persist, now: () => t + 3_600_000 }).getVehicle('cars:56:9984:2025-6');
+  assert.deepEqual(v2, v1);
+  assert.deepEqual(second.calls, ['/cars/brands/56/models/9984/years/2025-6?reference=328']);
+
+  // a day later the month list is asked again (a new month may be out); prices of past months never are
+  t += 86_400_000;
+  const third = api();
+  await createLiveRepository({ fetchImpl: third.fetchImpl, persist, now: () => t }).getVehicle('cars:56:9984:2025-6');
+  assert.deepEqual(third.calls.filter(c => !c.endsWith('reference=328')), ['/references']);
+
+  // offline: the brand list saved earlier still shows, even when old
+  const lists = createLiveRepository({ fetchImpl: api().fetchImpl, persist, now: () => t });
+  await lists.listBrands('cars');
+  const offline = createLiveRepository({ fetchImpl: (async () => { throw new TypeError('Network request failed'); }) as typeof fetch, persist, now: () => t + 30 * 86_400_000 });
+  assert.deepEqual((await offline.listBrands('cars')).map(b => b.name), ['Toyota', 'VW - VolksWagen']);
+  await assert.rejects(offline.listBrands('trucks'));   // never seen: the screen shows its error
+});
+
+test('saved answers: a broken store never breaks the screen', async () => {
+  const persist = { get: async () => { throw new Error('disk'); }, set: async () => { throw new Error('full'); } };
+  const v = await createLiveRepository({ fetchImpl: api().fetchImpl, persist }).getVehicle('cars:56:9984:2025-6');
+  assert.equal(v?.latest.priceCents, 17_364_500);
+});
