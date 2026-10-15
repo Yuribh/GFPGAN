@@ -134,3 +134,30 @@ test('saved answers: a broken store never breaks the screen', async () => {
   const v = await createLiveRepository({ fetchImpl: api().fetchImpl, persist }).getVehicle('cars:56:9984:2025-6');
   assert.equal(v?.latest.priceCents, 17_364_500);
 });
+
+test('free API: older tables answer 402; they are skipped from then on and never break the screen', async () => {
+  const calls: string[] = [];
+  const refs = Array.from({ length: 13 }, (_, i) => ({ code: String(338 - i), month: 'x' }));
+  const months = ['outubro', 'setembro', 'agosto'];
+  const saved = new Map<string, string>();
+  const persist = { get: async (k: string) => saved.get(k) ?? null, set: async (k: string, v: string) => { saved.set(k, v); } };
+  const fetchImpl = (async (url: string) => {
+    const path = url.replace('https://fipe.parallelum.com.br/api/v2', '');
+    calls.push(path);
+    if (path === '/references') return Response.json(refs);
+    const ref = Number(path.split('reference=')[1]);
+    if (338 - ref >= 3) return Response.json({ error: 'apenas assinantes pagos podem acessar o histórico de preços estendido' }, { status: 402 });
+    return Response.json({ brand: 'Toyota', codeFipe: '002182-2', fuel: 'Híbrido', model: 'Corolla', modelYear: 2025, price: `R$ 17${ref - 330}.000,00`, referenceMonth: `${months[338 - ref]} de 2026` });
+  }) as typeof fetch;
+  const repo = createLiveRepository({ fetchImpl, persist });
+  const v = await repo.getVehicle('cars:56:9984:2025-6');
+  assert.deepEqual(v?.history.map(p => p.referenceMonth), ['2026-08', '2026-09', '2026-10']);
+  assert.equal(calls.filter(c => c.includes('reference=')).length, 6);   // 3 free + one batch of 3 that hit the paywall
+  // another vehicle (and the next app launch) asks only for the free tables
+  calls.length = 0;
+  await repo.getVehicle('cars:56:9985:2025-6');
+  assert.equal(calls.filter(c => c.includes('reference=')).length, 3);
+  calls.length = 0;
+  await createLiveRepository({ fetchImpl, persist }).getVehicle('cars:56:9986:2025-6');
+  assert.equal(calls.filter(c => c.includes('reference=')).length, 3);
+});

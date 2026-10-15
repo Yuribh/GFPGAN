@@ -12,6 +12,8 @@ export interface KeyValueStore { get(key: string): Promise<string | null>; set(k
 export interface LiveRepoOptions { baseUrl?: string; fetchImpl?: typeof fetch; historyMonths?: number; persist?: KeyValueStore; now?: () => number }
 
 const DAY = 86_400_000;
+/** the free API only serves the latest tables (3 in October 2026); older ones answer 402 "paid subscribers only" */
+export class PaidHistoryError extends Error { constructor() { super('histórico só para assinantes da API FIPE'); } }
 /** how long a saved answer is used before asking again. A month's price never changes once published. */
 export function maxAge(path: string): number {
   if (path.includes('?reference=')) return Infinity;
@@ -61,12 +63,19 @@ export function createLiveRepository(opts: LiveRepoOptions = {}): LiveRepository
   const historyMonths = opts.historyMonths ?? 13;   // this month and the 12 before: the 6- and 12-month evolution
   const cache = new Map<string, Promise<unknown>>();
   const now = opts.now ?? Date.now;
+  // how many of the newest tables the API serves without a paid plan, once seen (kept a week on the phone)
+  let freeTables: number | null = null;
+  const FREE_KEY = 'fipe:free-tables';
+  const freeTablesKnown = (async () => {
+    try { const raw = await opts.persist?.get(FREE_KEY); if (raw) { const s = JSON.parse(raw); if (now() - s.t < 7 * DAY) freeTables = s.n; } } catch { /* ask again */ }
+  })();
 
   async function load<T>(path: string, allow404 = false): Promise<T | null> {
     for (let attempt = 0; ; attempt++) {
       const res = await f(base + path, { headers: { accept: 'application/json' } });
       if (res.ok) return (await res.json()) as T;
       if (res.status === 404 && allow404) return null;
+      if (res.status === 402) throw new PaidHistoryError();
       if (res.status === 429 && attempt < 2) { await new Promise(r => setTimeout(r, 1500 * (attempt + 1))); continue; }
       throw new Error(res.status === 429 ? 'Muitas consultas seguidas. Tente de novo em alguns minutos.' : `Não foi possível carregar (${res.status})`);
     }
@@ -132,14 +141,26 @@ export function createLiveRepository(opts: LiveRepoOptions = {}): LiveRepository
       if (!path) return null;
       // newest months first; without them, at least the current price
       const refs = await get<Reference[]>('/references').catch(() => null);
-      const recent = (refs ?? []).slice().sort((a, b) => Number(b.code) - Number(a.code)).slice(0, historyMonths);
+      await freeTablesKnown;
+      const wanted = Math.min(historyMonths, freeTables ?? historyMonths);
+      const recent = (refs ?? []).slice().sort((a, b) => Number(b.code) - Number(a.code)).slice(0, wanted);
       const answers: (Vehicle | null)[] = [];
       if (recent.length === 0) answers.push(await get<Vehicle>(path, true));
       // a few at a time, to stay under the API's per-minute limit (only the first visit: past months are kept on the phone)
-      for (let i = 0; i < recent.length; i += 4) {
-        const batch = recent.slice(i, i + 4).map((r, j) => get<Vehicle>(`${path}?reference=${r.code}`, true)
-          .catch(e => { if (i + j === 0) throw e; return null; }));   // the latest month must load; older ones may fail
+      let paywall = -1;
+      for (let i = 0; i < recent.length && paywall < 0; i += 3) {
+        const batch = recent.slice(i, i + 3).map((r, j) => get<Vehicle>(`${path}?reference=${r.code}`, true)
+          .catch(e => {
+            if (e instanceof PaidHistoryError) { if (paywall < 0 || i + j < paywall) paywall = i + j; return null; }
+            if (i + j === 0) throw e;   // the latest month must load; older ones may fail
+            return null;
+          }));
         answers.push(...await Promise.all(batch));
+      }
+      // older tables need a paid plan: stop asking for them (they only cost requests)
+      if (paywall > 0 && freeTables !== paywall) {
+        freeTables = paywall;
+        opts.persist?.set(FREE_KEY, JSON.stringify({ t: now(), n: paywall })).catch(() => {});
       }
       const valid = answers.filter((v): v is Vehicle => !!v);
       const v = valid[0];

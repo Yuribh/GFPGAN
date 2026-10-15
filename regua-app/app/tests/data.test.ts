@@ -40,7 +40,7 @@ test('models and years drill down, newest year first, zero km on top', async () 
 test('getVehicle returns latest price, change and history', async () => {
   const v = await repo.getVehicle('y-1');
   assert.ok(v);
-  assert.equal(v.history.length, 12);
+  assert.equal(v.history.length, 13);   // this month and the 12 before
   assert.equal(v.latest.referenceMonth, '2026-10');
   assert.equal(v.latest.currency, 'BRL');
   assert.ok(v.change);

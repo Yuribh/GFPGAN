@@ -25,3 +25,9 @@ export function changeSince(points: PricePoint[], months: number): { from: Price
   const cents = last.priceCents - from.priceCents;
   return { from, cents, percent: (cents / from.priceCents) * 100 };
 }
+
+/** whole months from `a` to `b` ("2026-04" to "2026-10" -> 6) */
+export function monthsBetween(a: string, b: string): number {
+  const [ya, ma] = a.split('-').map(Number), [yb, mb] = b.split('-').map(Number);
+  return (yb * 12 + mb) - (ya * 12 + ma);
+}

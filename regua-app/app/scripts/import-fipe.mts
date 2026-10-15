@@ -41,6 +41,11 @@ try {
     spent += r.requestsUsed;
     console.log(`  ${r.status}: ${r.pricesWritten} prices, ${r.skippedNoPrice} without price, ${r.requestsUsed} requests${r.error ? ` (${r.error})` : ''}`);
     if (r.status === 'succeeded') await store.markMonthComplete(ref.code);
+    else if (r.status === 'failed' && /\b402\b/.test(r.error ?? '')) {
+      // the free API serves only the latest tables; older ones (6 and 12 months back) need the paid plan's token
+      console.log(`::notice title=FIPE history needs the paid plan::${ref.month.trim()} and older months answer 402 without a paid FIPE_API_TOKEN (fipe.api.br). Months already imported stay.`);
+      break;
+    }
     else { if (r.status === 'failed') process.exitCode = 1; break; }
   }
   const { rows } = await client.query(`select (select count(*) from brands) brands, (select count(*) from model_years) model_years,

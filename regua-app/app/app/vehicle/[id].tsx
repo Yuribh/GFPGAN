@@ -9,7 +9,7 @@ import { formatBRL, formatModelYear, formatMonth, formatPercent } from '../../sr
 import { compareList, favorites, history } from '../../src/storage.ts';
 import { Button, Header, Loading, Message } from '../../src/ui/kit.tsx';
 import { PriceChart } from '../../src/ui/PriceChart.tsx';
-import { changeSince } from '../../src/logic/evolution.ts';
+import { changeSince, monthsBetween } from '../../src/logic/evolution.ts';
 import { c, card, r, s, font, layout } from '../../src/theme.ts';
 import { track } from '../../src/services/track.ts';
 
@@ -41,6 +41,9 @@ export default function Vehicle() {
   if (!v) return <Screen><Message title="Não há preço para este ano nesta tabela." /></Screen>;
 
   const ch = v.change;
+  // the 6/12 choice only when there is that much history (the free FIPE API serves the latest 3 tables)
+  const span = v.history.length > 1 ? monthsBetween(v.history[0].referenceMonth, v.latest.referenceMonth) : 0;
+  const spanOptions = [6, 12].filter(m => span >= m);
   const arrow = !ch ? '' : ch.cents > 0 ? '▲' : ch.cents < 0 ? '▼' : '■';
   const shareText = `${v.brand.name} ${v.model.name} ${formatModelYear(v.year.modelYear)}: ${formatBRL(v.latest.priceCents)} (tabela de ${formatMonth(v.latest.referenceMonth)})`;
 
@@ -86,15 +89,17 @@ export default function Vehicle() {
 
         <Text style={st.h2} accessibilityRole="header">Evolução do preço</Text>
         <View style={[card, { padding: s[4] }]}>
-          <View style={st.seg} accessibilityRole="radiogroup" accessibilityLabel="Período">
-            {[6, 12].map(m => (
-              <Pressable key={m} onPress={() => setMonths(m)} accessibilityRole="radio" accessibilityState={{ checked: months === m }}
-                style={[st.segBtn, months === m && st.segOn]}>
-                <Text style={[st.segText, months === m && { color: c.onAccent }]}>{m} meses</Text>
-              </Pressable>
-            ))}
-          </View>
-          <PriceChart points={v.history} months={months} width={width - 2 * layout['screen-gutter'] - 2 * s[4]} />
+          {spanOptions.length > 1 ? (
+            <View style={st.seg} accessibilityRole="radiogroup" accessibilityLabel="Período">
+              {spanOptions.map(m => (
+                <Pressable key={m} onPress={() => setMonths(m)} accessibilityRole="radio" accessibilityState={{ checked: months === m }}
+                  style={[st.segBtn, months === m && st.segOn]}>
+                  <Text style={[st.segText, months === m && { color: c.onAccent }]}>{m} meses</Text>
+                </Pressable>
+              ))}
+            </View>
+          ) : v.history.length > 1 ? <Text style={[st.muted, { marginBottom: s[2] }]}>{span < 6 ? `Últimos ${v.history.length} meses da tabela` : 'Últimos 6 meses'}</Text> : null}
+          <PriceChart points={v.history} months={spanOptions.length > 1 ? months : spanOptions[0] ?? Math.max(span, 1)} width={width - 2 * layout['screen-gutter'] - 2 * s[4]} />
           {[6, 12].map(m => {
             const d = changeSince(v.history, m);
             if (!d) return null;
