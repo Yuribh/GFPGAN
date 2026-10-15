@@ -22,8 +22,8 @@ export default function Home() {
   return (
     <SafeAreaView style={{ flex: 1 }} edges={['top']}>
       <ScrollView contentContainerStyle={st.page}>
-        <Text style={st.brand} accessibilityRole="header">Régua</Text>
-        {usingSampleData ? <Text style={st.note}>Dados de exemplo. Configure o Supabase para ver preços reais.</Text> : null}
+        <Text style={st.brand} accessibilityRole="header">Valor do Carro</Text>
+        {usingSampleData ? <Text style={st.note}>Dados de exemplo, não são preços reais.</Text> : null}
 
         <View style={[card, st.findCard]}>
           <Text style={st.h2} accessibilityRole="header">Qual veículo você quer consultar?</Text>
@@ -54,7 +54,7 @@ export default function Home() {
           {insurance ? <InsuranceTool url={insurance.url} label={insurance.label} /> : null}
         </View>
 
-        {/* one fixed banner on the free plan, never pop-ups; hidden for Régua Plus */}
+        {/* one fixed banner on the free plan, never pop-ups; hidden for Valor do Carro Plus */}
         <View style={st.ad}><AdBanner /></View>
       </ScrollView>
     </SafeAreaView>

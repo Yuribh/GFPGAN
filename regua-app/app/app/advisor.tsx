@@ -43,7 +43,7 @@ export default function Advisor() {
     else {
       setTurns(t => t.slice(0, -1));        // keep the history valid: drop the unanswered question
       setDraft(question);
-      if (a.status === 'limit') setNotice({ text: `Você já fez as ${a.limit} perguntas de hoje.${!a.plus && plus.available ? ' Com o Régua Plus são mais perguntas por dia.' : ' Volte amanhã.'}`, plusOffer: !a.plus && plus.available });
+      if (a.status === 'limit') setNotice({ text: `Você já fez as ${a.limit} perguntas de hoje.${!a.plus && plus.available ? ' Com o Valor do Carro Plus são mais perguntas por dia.' : ' Volte amanhã.'}`, plusOffer: !a.plus && plus.available });
       else if (a.status === 'offline') setNotice({ text: 'Não deu para enviar. Confira sua conexão e tente outra vez.' });
       else setNotice({ text: 'O consultor está indisponível agora. Tente mais tarde.' });
     }
@@ -91,7 +91,7 @@ export default function Advisor() {
           {notice ? (
             <View style={[card, { padding: s[3], gap: s[2] }]} accessibilityLiveRegion="polite">
               <Text style={{ color: c.text, fontSize: font.sm.fontSize }}>{notice.text}</Text>
-              {notice.plusOffer ? <Text style={st.link} onPress={() => router.push('/plus')} accessibilityRole="link">Conhecer o Régua Plus</Text> : null}
+              {notice.plusOffer ? <Text style={st.link} onPress={() => router.push('/plus')} accessibilityRole="link">Conhecer o Valor do Carro Plus</Text> : null}
             </View>
           ) : null}
           <Text style={[kit.muted, { marginBottom: s[3] }]}>

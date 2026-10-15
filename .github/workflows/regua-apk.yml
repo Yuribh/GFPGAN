@@ -1,4 +1,4 @@
-name: Régua APK
+name: Valor do Carro APK
 
 # Builds an installable Android APK of regua-app/app and publishes it at
 # https://github.com/<owner>/<repo>/releases/download/regua-apk/regua.apk
@@ -76,11 +76,11 @@ jobs:
         run: |
           # never delete the current APK before the new one is safely uploaded:
           # replace the file in place when the release exists, create it only the first time
-          notes="APK de teste do Régua, gerado a partir de $GITHUB_SHA. Preços reais da tabela FIPE. Instale no Android permitindo apps de fontes desconhecidas."
+          notes="APK de teste do Valor do Carro, gerado a partir de $GITHUB_SHA. Preços reais da tabela FIPE. Instale no Android permitindo apps de fontes desconhecidas."
           if gh release view regua-apk >/dev/null 2>&1; then
             gh release upload regua-apk regua.apk --clobber
-            gh release edit regua-apk --notes "$notes"
+            gh release edit regua-apk --title "Valor do Carro APK (teste)" --notes "$notes"
           else
             gh release create regua-apk regua.apk --target "$GITHUB_SHA" --prerelease \
-              --title "Régua APK (teste)" --notes "$notes"
+              --title "Valor do Carro APK (teste)" --notes "$notes"
           fi

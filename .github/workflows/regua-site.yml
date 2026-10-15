@@ -1,4 +1,4 @@
-name: Régua site
+name: Valor do Carro site
 
 # Publishes regua-app/app/landing (home, privacy policy, terms, support) and the web prototype to GitHub Pages:
 # https://<owner>.github.io/<repo>/  (the store listings link to privacidade.html and suporte.html there)

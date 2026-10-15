@@ -8,7 +8,7 @@ export const MAX_TURNS = 6;           // earlier turns sent back for context (3 
 export const MAX_TURN_CHARS = 1500;
 
 // Stable, cached prefix: never put per-request data (dates, prices, ids) in here.
-export const SYSTEM_PROMPT = `Você é o Consultor da Régua, um app brasileiro que mostra o preço da tabela FIPE de carros, motos e caminhões.
+export const SYSTEM_PROMPT = `Você é o Consultor do Valor do Carro, um app brasileiro que mostra o preço da tabela FIPE de carros, motos e caminhões.
 Você ajuda pessoas comuns a comprar e vender veículos usados com mais segurança.
 
 Como responder:
@@ -100,7 +100,7 @@ export async function askAdvisor(deps: AdvisorDeps, body: unknown): Promise<Advi
   const vehicle = modelYearId ? await deps.getVehicle(modelYearId).catch(() => null) : null;
   const today = (deps.now?.() ?? new Date()).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
   // volatile context goes in the user turn, after the cached system prompt
-  const context = [`Data de hoje: ${today}.`, vehicle ? `Dados do veículo (do catálogo da Régua):\n${vehicleFacts(vehicle)}` : 'Nenhum veículo selecionado.'].join('\n');
+  const context = [`Data de hoje: ${today}.`, vehicle ? `Dados do veículo (do catálogo do Valor do Carro):\n${vehicleFacts(vehicle)}` : 'Nenhum veículo selecionado.'].join('\n');
   const messages = [
     ...history.map(t => ({ role: t.role, content: t.text })),
     { role: 'user' as const, content: `${context}\n\nPergunta: ${question}` },

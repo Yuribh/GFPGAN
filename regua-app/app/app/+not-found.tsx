@@ -8,7 +8,7 @@ import { layout, s } from '../src/theme.ts';
 export default function NotFound() {
   return (
     <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
-      <Header title="Régua" />
+      <Header title="Valor do Carro" />
       <View style={{ padding: layout['screen-gutter'], gap: s[3] }}>
         <Message title="Não encontramos esta página." detail="O link pode estar errado ou ser de uma versão antiga do app." />
         <Button label="Ir para o início" icon="home" onPress={() => router.replace('/')} />

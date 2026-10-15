@@ -25,7 +25,7 @@ export function buildReportHtml(v: VehicleResult, generatedAt: Date, opts: { sam
     return `<tr><td>${esc(formatMonth(p.referenceMonth))}</td><td class="n">${esc(formatBRL(p.priceCents))}</td><td class="n">${esc(ch)}</td></tr>`;
   }).join('');
   const date = generatedAt.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'America/Sao_Paulo' });
-  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Relatório Régua · ${esc(v.model.name)}</title>
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Relatório Valor do Carro · ${esc(v.model.name)}</title>
 <style>
 body{font-family:-apple-system,Roboto,Helvetica,Arial,sans-serif;color:#292929;margin:32px;font-size:14px;line-height:20px}
 h1{font-size:24px;line-height:30px;margin:0 0 4px}.muted{color:#5b6470}.brand{color:#b5420c;font-weight:700;font-size:18px}
@@ -34,7 +34,7 @@ h1{font-size:24px;line-height:30px;margin:0 0 4px}.muted{color:#5b6470}.brand{co
 table{width:100%;border-collapse:collapse;margin-top:8px}td,th{padding:6px 8px;border-bottom:1px solid #e3e6ea;text-align:left}.n{text-align:right}
 .note{margin-top:24px;font-size:12px;color:#5b6470}
 </style></head><body>
-<div class="brand">Régua</div>
+<div class="brand">Valor do Carro</div>
 <p class="muted">Relatório de preço · gerado em ${esc(date)}</p>
 <p class="muted">${esc(v.brand.name)} · ${esc(TYPE[v.brand.vehicleType])}</p>
 <h1>${esc(v.model.name)}</h1>
@@ -48,6 +48,6 @@ table{width:100%;border-collapse:collapse;margin-top:8px}td,th{padding:6px 8px;b
 ${chartSvg(v)}
 <h2 style="font-size:16px;margin-top:24px">Preço mês a mês</h2>
 <table><thead><tr><th>Mês</th><th class="n">Preço FIPE</th><th class="n">Variação</th></tr></thead><tbody>${rows}</tbody></table>
-<p class="note">${opts.sample ? '<b>Dados de exemplo, não são valores reais da tabela FIPE.</b> ' : ''}Valores da tabela FIPE, referência de preço médio; o preço de mercado pode variar com estado, quilometragem e região. A Régua não é afiliada à Fundação Instituto de Pesquisas Econômicas (FIPE).</p>
+<p class="note">${opts.sample ? '<b>Dados de exemplo, não são valores reais da tabela FIPE.</b> ' : ''}Valores da tabela FIPE, referência de preço médio; o preço de mercado pode variar com estado, quilometragem e região. O Valor do Carro não é afiliado à Fundação Instituto de Pesquisas Econômicas (FIPE).</p>
 </body></html>`;
 }

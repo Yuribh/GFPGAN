@@ -1,4 +1,4 @@
-name: Régua CI
+name: Valor do Carro CI
 
 # Every push to the app: unit tests, type check, database checks, and an end-to-end smoke test with REAL FIPE data:
 # fresh database -> migrations -> import of a small slice of the live FIPE API -> read back through PostgREST

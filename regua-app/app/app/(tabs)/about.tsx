@@ -19,13 +19,13 @@ export default function About() {
       <Header title="Sobre" />
       <ScrollView contentContainerStyle={{ paddingHorizontal: layout['screen-gutter'], paddingBottom: s[7], gap: s[5] }}>
         <View style={[card, { padding: s[4], gap: s[2] }]}>
-          <Text style={{ color: c.text, fontSize: font.base.fontSize }}>Régua mostra o preço da tabela FIPE, sem cadastro e sem pop-up.</Text>
-          <Text style={st.muted}>A Régua não é afiliada à Fundação Instituto de Pesquisas Econômicas (FIPE). Os valores seguem a tabela FIPE e podem variar do preço praticado no mercado.</Text>
+          <Text style={{ color: c.text, fontSize: font.base.fontSize }}>O Valor do Carro mostra o preço da tabela FIPE, sem cadastro e sem pop-up.</Text>
+          <Text style={st.muted}>O Valor do Carro não é afiliado à Fundação Instituto de Pesquisas Econômicas (FIPE). Os valores seguem a tabela FIPE e podem variar do preço praticado no mercado.</Text>
         </View>
 
         {plus.available ? (
           <List>
-            <Row title="Régua Plus" subtitle={plus.isPlus ? 'Ativo. Obrigado pelo apoio!' : 'Use sem anúncios'} onPress={() => router.push('/plus')} />
+            <Row title="Valor do Carro Plus" subtitle={plus.isPlus ? 'Ativo. Obrigado pelo apoio!' : 'Use sem anúncios'} onPress={() => router.push('/plus')} />
             {plus.isPlus ? <Row title="Gerenciar ou cancelar assinatura" onPress={plus.manage} /> : null}
           </List>
         ) : null}

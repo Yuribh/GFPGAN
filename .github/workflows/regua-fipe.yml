@@ -1,4 +1,4 @@
-name: Régua FIPE import
+name: Valor do Carro FIPE import
 
 # Fills the Supabase database with the FIPE table: applies the migrations, then imports the newest month and the
 # months before it (price history). Resumable: each run continues where the previous one stopped.

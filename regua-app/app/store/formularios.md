@@ -1,7 +1,7 @@
 # Respostas para os formulários das lojas
 
 Baseado no que o app faz hoje: sem conta, favoritos só no aparelho, contagem anônima de uso (Supabase),
-relatórios de erro (Sentry), um banner do AdMob e a assinatura Régua Plus (RevenueCat).
+relatórios de erro (Sentry), um banner do AdMob e a assinatura Valor do Carro Plus (RevenueCat).
 Se você desligar algum desses serviços, ajuste as respostas. Releia na hora de preencher: os formulários mudam.
 
 ## Google Play: Segurança dos dados (Data safety)
@@ -69,19 +69,19 @@ Todos abaixo: **Não vinculados à identidade do usuário**, **Não usados para 
 
 ## Assinaturas (as duas lojas)
 
-- Grupo: **Régua Plus**. Produtos: `plus_monthly` (R$ 9,90/mês) e `plus_yearly` (R$ 99,00/ano).
+- Grupo: **Valor do Carro Plus**. Produtos: `plus_monthly` (R$ 9,90/mês) e `plus_yearly` (R$ 99,00/ano).
 - No RevenueCat: entitlement **`plus`** com os dois produtos; offering **default** (marcada como atual) com os pacotes **Monthly** e **Annual**. O app lê esses nomes.
-- Nome de exibição: "Régua Plus mensal" / "Régua Plus anual". Descrição: "Use a Régua sem anúncios."
-- Apple exige uma captura da tela de assinatura para a revisão: use a tela Sobre › Régua Plus no app instalado pelo TestFlight.
+- Nome de exibição: "Valor do Carro Plus mensal" / "Valor do Carro Plus anual". Descrição: "Use o Valor do Carro sem anúncios."
+- Apple exige uma captura da tela de assinatura para a revisão: use a tela Sobre › Valor do Carro Plus no app instalado pelo TestFlight.
 
 ## Nota para o revisor (App Review / Google)
 
 ```
-A Régua não exige login: todas as funções estão disponíveis ao abrir o app.
+O Valor do Carro não exige login: todas as funções estão disponíveis ao abrir o app.
 Para testar: toque em Carros, escolha uma marca, um modelo e um ano para ver o preço da tabela FIPE.
 Busca por placa: digite uma placa no campo "Buscar pela placa" (limite de 3 por dia no plano grátis). O app mostra apenas dados do veículo, nunca do proprietário.
 Consultor (Ferramentas > Consultor): respostas geradas por IA a partir da tabela FIPE, com aviso na tela; limite de 5 perguntas por dia no plano grátis.
-A assinatura Régua Plus (Sobre > Régua Plus) apenas remove o banner de anúncio; a consulta é sempre gratuita.
+A assinatura Valor do Carro Plus (Sobre > Valor do Carro Plus) apenas remove o banner de anúncio; a consulta é sempre gratuita.
 Cancelamento: Sobre > Gerenciar ou cancelar assinatura abre a tela de assinaturas da loja.
-A Régua não é afiliada à Fundação Instituto de Pesquisas Econômicas (FIPE); exibimos os valores públicos da tabela como referência.
+O Valor do Carro não é afiliado à Fundação Instituto de Pesquisas Econômicas (FIPE); exibimos os valores públicos da tabela como referência.
 ```

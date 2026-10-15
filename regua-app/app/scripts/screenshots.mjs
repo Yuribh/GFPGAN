@@ -1,5 +1,5 @@
 // Store screenshots from the web build, with the sample data (no Supabase keys set).
-// Usage: npx expo export --platform web --output-dir dist-web && node scripts/screenshots.mjs dist-web store/screenshots
+// Usage: EXPO_PUBLIC_DATA_SOURCE=sample npx expo export --platform web --output-dir dist-web && node scripts/screenshots.mjs dist-web store/screenshots
 // Needs Playwright with Chromium (npm i -D playwright && npx playwright install chromium), or a global install.
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';

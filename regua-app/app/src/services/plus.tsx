@@ -1,4 +1,4 @@
-// Régua Plus (no ads) through RevenueCat. Prices always come from the store at purchase time, never from the code.
+// Valor do Carro Plus (no ads) through RevenueCat. Prices always come from the store at purchase time, never from the code.
 // Off when there is no RevenueCat key for the platform, on the web and in Expo Go: then everyone is on the free plan.
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Linking, Platform } from 'react-native';

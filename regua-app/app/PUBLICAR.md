@@ -1,4 +1,4 @@
-# Como publicar a Régua
+# Como publicar o Valor do Carro
 
 O código está pronto para publicar. O que falta são **contas e chaves que só você pode criar**, porque ficam no seu nome.
 Siga na ordem. Cada passo diz onde colocar o que você criar.
@@ -21,7 +21,7 @@ Siga na ordem. Cada passo diz onde colocar o que você criar.
 | **Consultor** com IA (Claude): dúvidas de compra e venda com os dados FIPE do veículo; 5 perguntas/dia grátis, 50 no Plus, teto diário de gasto | `app/advisor.tsx`, `server/advisor/`, `supabase/functions/advisor`, `migrations/0007` |
 | **Ferramentas**: comparar até 3 veículos (com gráfico), card de venda em imagem para compartilhar, relatório de preço em PDF | `app/compare.tsx`, `app/sale-card.tsx`, `app/report.tsx` |
 | **Busca por placa**: campo no início, cache por placa, limite de 3/dia grátis e 30/dia no Plus, teto diário de gastos; a placa nunca é guardada em texto | `app/plate.tsx`, `server/plate/`, `supabase/functions/plate-lookup`, `migrations/0006` |
-| Assinatura **Régua Plus** (remove anúncios): tela de planos, compra, restaurar, cancelar com um toque | `app/plus.tsx`, `src/services/plus.tsx` |
+| Assinatura **Valor do Carro Plus** (remove anúncios): tela de planos, compra, restaurar, cancelar com um toque | `app/plus.tsx`, `src/services/plus.tsx` |
 | **Um banner** do AdMob no plano grátis, com pedido de consentimento (LGPD/GDPR); some para quem assina | `src/services/ads.tsx` |
 | **Relatórios de erro** (Sentry) e **contagem anônima de uso** (tabela `app_events`, sem dados pessoais) | `src/services/`, `supabase/migrations/0005_app_events.sql` |
 | Política de privacidade, termos de uso e página de suporte | `landing/privacidade.html`, `termos.html`, `suporte.html` |
@@ -38,10 +38,10 @@ Sem nenhuma chave, o app funciona com dados de exemplo, anúncio de teste do Goo
    Depois, em Settings › Environments › `github-pages`, permita o branch `claude/regua-app-iyjqep` (ou faça o merge do PR no `master`).
 3. **Variáveis** `REGUA_RESPONSAVEL` (seu nome completo ou razão social, e CPF/CNPJ) e `REGUA_EMAIL` (e-mail de contato).
    Elas preenchem a política de privacidade, os termos e o suporte.
-4. Actions › *Régua site* › *Run workflow*. O site fica em https://yuribh.github.io/GFPGAN/
+4. Actions › *Valor do Carro site* › *Run workflow*. O site fica em https://yuribh.github.io/GFPGAN/
 
 ## 2. Marca e jurídico (antes de gastar com o resto)
-- Pesquise "Régua" e "Regua" no INPI (https://busca.inpi.gov.br), classes 9 e 42.
+- Pesquise "Valor do Carro" no INPI (https://busca.inpi.gov.br), classes 9 e 42.
 - Peça a um advogado para revisar `landing/privacidade.html` e `landing/termos.html`, o uso descritivo de "FIPE" e os termos da fonte de dados.
 
 ## 3. Dados reais: preencher o banco com a tabela FIPE
@@ -55,7 +55,7 @@ O jeito mais simples: o **GitHub Actions** cria as tabelas e importa a tabela FI
 4. No GitHub, em **Settings › Secrets and variables › Actions › New repository secret**, crie:
    - `SUPABASE_DB_URL`: a URI do passo 3
    - `FIPE_API_TOKEN`: o token da API FIPE
-5. Em **Actions › Régua FIPE import**, abra a última execução e clique em **Re-run all jobs** (ou rode pelo botão
+5. Em **Actions › Valor do Carro FIPE import**, abra a última execução e clique em **Re-run all jobs** (ou rode pelo botão
    *Run workflow* depois do merge no `master`). Ele aplica as migrações e começa a importar:
    primeiro o mês mais novo, depois os 11 anteriores (o histórico do gráfico).
    Cada execução dura até 5h30 e a seguinte continua de onde parou; o agendamento roda a cada 6 horas nos dias 1 a 20
@@ -88,9 +88,9 @@ Cada consulta nova custa dinheiro ao fornecedor (preços vistos: perto de R$ 0,8
    - Segredos do fornecedor: `PLATE_API_URL` (ex.: `https://api.fornecedor.com/v1/placa/{plate}`), `PLATE_API_TOKEN`,
      `PLATE_API_AUTH` (`bearer`, `header:Nome-Do-Header` ou `query:nome_do_parametro`, conforme a documentação dele).
    - Segredo `PLATE_HASH_PEPPER`: qualquer texto longo e aleatório (ex.: o resultado de `openssl rand -hex 32`). Não troque depois.
-3. Actions › **Régua Supabase deploy** › Run workflow. Ele cria as tabelas, envia os segredos, publica as funções e confere
+3. Actions › **Valor do Carro Supabase deploy** › Run workflow. Ele cria as tabelas, envia os segredos, publica as funções e confere
    que `plate-lookup` está no ar.
-4. Variáveis do app `EXPO_PUBLIC_SUPABASE_URL` e `EXPO_PUBLIC_SUPABASE_ANON_KEY` (passo 3) e rode **Régua APK**: o APK novo
+4. Variáveis do app `EXPO_PUBLIC_SUPABASE_URL` e `EXPO_PUBLIC_SUPABASE_ANON_KEY` (passo 3) e rode **Valor do Carro APK**: o APK novo
    já consulta placas de verdade.
 5. **Me mande um exemplo de resposta do fornecedor** (com dados de teste): o leitor da resposta (`server/plate/provider.ts`)
    entende os formatos comuns, mas vale confirmar os nomes dos campos e adicionar um teste com o formato real.
@@ -134,8 +134,8 @@ Se fechar parceria com uma seguradora ou corretora, coloque o link (https) em `E
 5. Depois que o app estiver publicado, vincule-o à loja no AdMob e publique o `app-ads.txt` (o AdMob mostra o conteúdo; coloque em `landing/app-ads.txt`).
 
 ## 5. Assinatura (RevenueCat)
-1. Crie as assinaturas nas lojas (passos 7 e 8): grupo **Régua Plus**, produtos `plus_monthly` (R$ 9,90) e `plus_yearly` (R$ 99).
-2. Em https://app.revenuecat.com: projeto **Régua**, apps Android e iOS, importe os dois produtos.
+1. Crie as assinaturas nas lojas (passos 7 e 8): grupo **Valor do Carro Plus**, produtos `plus_monthly` (R$ 9,90) e `plus_yearly` (R$ 99).
+2. Em https://app.revenuecat.com: projeto **Valor do Carro**, apps Android e iOS, importe os dois produtos.
 3. Entitlement **`plus`** com os dois produtos. Offering **default** (atual) com os pacotes **Monthly** e **Annual**.
 4. Chaves públicas do SDK: `EXPO_PUBLIC_REVENUECAT_ANDROID_KEY` e `EXPO_PUBLIC_REVENUECAT_IOS_KEY`.
 5. O webhook (`billing-webhook`) é opcional nesta versão: sem contas de usuário, o app confere a assinatura direto no RevenueCat.
@@ -149,7 +149,7 @@ Crie um projeto React Native em https://sentry.io e coloque o DSN em `EXPO_PUBLI
 3. Expo: crie a conta em https://expo.dev, rode `npx eas-cli init` dentro de `regua-app/app` e guarde o ID do projeto
    na variável `EAS_PROJECT_ID` (GitHub *Variables* e seu `.env.local`). Crie um token em expo.dev › Access tokens
    e salve como *Secret* `EXPO_TOKEN` no GitHub.
-4. Gere a versão de loja: Actions › *Régua store build* › plataforma `android` (ou `npx eas-cli build -p android --profile production`).
+4. Gere a versão de loja: Actions › *Valor do Carro store build* › plataforma `android` (ou `npx eas-cli build -p android --profile production`).
    A Expo cria e guarda a chave de assinatura definitiva. **Não perca a conta da Expo.**
 5. Crie o app no Play Console, envie o primeiro `.aab` **manualmente** (o Google exige) em Teste interno.
 6. Preencha *Conteúdo do app* e *Segurança dos dados* com `store/formularios.md`.
@@ -164,7 +164,7 @@ Crie um projeto React Native em https://sentry.io e coloque o DSN em `EXPO_PUBLI
 3. No App Store Connect: privacidade, classificação e nota ao revisor em `store/formularios.md`; capturas `store/screenshots/iphone-6.9-*.png`.
 
 ## 9. Antes de apertar "publicar"
-- [ ] Testar no celular o APK com as chaves reais (Actions › *Régua APK*): preço real, banner, compra de teste e cancelamento.
+- [ ] Testar no celular o APK com as chaves reais (Actions › *Valor do Carro APK*): preço real, banner, compra de teste e cancelamento.
 - [ ] Mostrar o app para ~10 pessoas que consultam a FIPE todo mês (plano de lançamento).
 - [ ] Trocar as capturas de tela por versões com dados reais.
 - [ ] `npm audit` e atualizar o que for crítico.

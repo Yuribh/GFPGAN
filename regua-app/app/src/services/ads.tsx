@@ -1,4 +1,4 @@
-// One banner on the free plan, never pop-ups or full-screen ads. Hidden for Régua Plus subscribers.
+// One banner on the free plan, never pop-ups or full-screen ads. Hidden for Valor do Carro Plus subscribers.
 // Consent (Google UMP, LGPD/GDPR) is asked before the ads SDK starts. Off in Expo Go and on the web.
 import { useEffect, useState } from 'react';
 import { Platform, View } from 'react-native';

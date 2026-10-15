@@ -1,4 +1,4 @@
-// Régua Plus: removes the ad. Lookups stay free forever; there is no paywall in front of a price.
+// Valor do Carro Plus: removes the ad. Lookups stay free forever; there is no paywall in front of a price.
 import { useEffect, useState } from 'react';
 import { Alert, Linking, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,7 +9,7 @@ import { track } from '../src/services/track.ts';
 import { Button, Header, Loading, Message, st as kit } from '../src/ui/kit.tsx';
 import { c, card, r, s, font, layout } from '../src/theme.ts';
 
-const PERKS = ['Sem anúncio em nenhuma tela', 'Até 30 consultas por placa por dia (3 no grátis)', '50 perguntas por dia ao Consultor (5 no grátis)', 'Ajuda a manter a Régua grátis para todo mundo', 'Cancele quando quiser, com um toque'];
+const PERKS = ['Sem anúncio em nenhuma tela', 'Até 30 consultas por placa por dia (3 no grátis)', '50 perguntas por dia ao Consultor (5 no grátis)', 'Ajuda a manter o Valor do Carro grátis para todo mundo', 'Cancele quando quiser, com um toque'];
 
 export default function Plus() {
   const plus = usePlus();
@@ -34,19 +34,19 @@ export default function Plus() {
     setBusy(true);
     const ok = await plus.restore();
     setBusy(false);
-    Alert.alert(ok ? 'Régua Plus restaurado' : 'Nenhuma assinatura encontrada',
-      ok ? 'Obrigado por apoiar a Régua.' : 'Use a mesma conta da loja em que você assinou.');
+    Alert.alert(ok ? 'Valor do Carro Plus restaurado' : 'Nenhuma assinatura encontrada',
+      ok ? 'Obrigado por apoiar o Valor do Carro.' : 'Use a mesma conta da loja em que você assinou.');
   };
 
   let body;
   if (!plus.available) {
-    body = <Message title="Assinatura indisponível nesta versão" detail="A Régua Plus aparece na versão instalada pela Play Store ou App Store." />;
+    body = <Message title="Assinatura indisponível nesta versão" detail="O Valor do Carro Plus aparece na versão instalada pela Play Store ou App Store." />;
   } else if (plus.isPlus) {
     body = (
       <View style={[card, st.box]}>
         <Feather name="check-circle" size={32} color={c.accent} />
-        <Text style={st.h1}>Você é Régua Plus</Text>
-        <Text style={kit.muted}>Obrigado por apoiar a Régua. Os anúncios estão desligados.</Text>
+        <Text style={st.h1}>Você é Valor do Carro Plus</Text>
+        <Text style={kit.muted}>Obrigado por apoiar o Valor do Carro. Os anúncios estão desligados.</Text>
         <View style={{ marginTop: s[4], alignSelf: 'stretch' }}>
           <Button variant="secondary" icon="settings" label="Gerenciar ou cancelar assinatura" onPress={plus.manage} />
         </View>
@@ -93,7 +93,7 @@ export default function Plus() {
 
   return (
     <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
-      <Header title="Régua Plus" back />
+      <Header title="Valor do Carro Plus" back />
       <ScrollView contentContainerStyle={{ padding: layout['screen-gutter'], paddingBottom: s[7] }}>
         <View style={{ gap: s[2], marginBottom: s[5] }}>
           {PERKS.map(p => (

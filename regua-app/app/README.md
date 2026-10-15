@@ -1,4 +1,4 @@
-# Régua (app Android e iOS)
+# Valor do Carro (app Android e iOS)
 
 Um só código em Expo (React Native) gera o app de Android e de iPhone.
 
@@ -21,7 +21,7 @@ Sem configuração, o app usa **dados de exemplo** (avisa na tela). Para dados r
 O GitHub Actions (`.github/workflows/regua-apk.yml`) gera o APK a cada push neste app e publica em:
 https://github.com/Yuribh/GFPGAN/releases/download/regua-apk/regua.apk
 (QR code: `../replica/launch/regua-apk-qr.png`). Abra o link no celular, baixe e instale permitindo "fontes desconhecidas".
-Na primeira vez, ative o Actions no repositório (aba **Actions** → "I understand my workflows, go ahead and enable them") e rode o workflow **Régua APK** em "Run workflow".
+Na primeira vez, ative o Actions no repositório (aba **Actions** → "I understand my workflows, go ahead and enable them") e rode o workflow **Valor do Carro APK** em "Run workflow".
 
 ## Gerar os apps para as lojas (EAS Build, na nuvem da Expo)
 Não precisa de Mac nem para o iOS.
@@ -50,7 +50,7 @@ Antes:
 - Consultor: `app/advisor.tsx`; servidor em `server/advisor/` (prompt, regras, adaptador do Claude) e `supabase/functions/advisor`.
 - Ferramentas: `app/compare.tsx` (comparar até 3), `app/sale-card.tsx` (card de venda em imagem), `app/report.tsx` (relatório em PDF), `app/choose.tsx` (escolher o veículo); lógica testada em `src/logic/compare.ts`, `saleCard.ts`, `report.ts`.
 - `app/plate.tsx` + `src/ui/PlateSearch.tsx` busca por placa; `server/plate/` e `supabase/functions/plate-lookup` (fornecedor, cache, limites).
-- `app/plus.tsx` assinatura Régua Plus. `src/services/` assinatura (RevenueCat), anúncio (AdMob), erros (Sentry), contagem anônima de uso.
+- `app/plus.tsx` assinatura Valor do Carro Plus. `src/services/` assinatura (RevenueCat), anúncio (AdMob), erros (Sentry), contagem anônima de uso.
 - `server/`, `supabase/` backend, migrações e funções (`supabase/schedule.sql` agenda a importação). `prototype/` protótipo web.
 - `landing/` site: página de venda, privacidade, termos, suporte (publicado no GitHub Pages).
 - `store/` material das lojas: capturas, imagem de destaque, respostas dos formulários.

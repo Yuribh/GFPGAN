@@ -66,7 +66,7 @@ export default function SaleCard() {
           <View ref={cardRef} collapsable={false} style={st.card}>
             <View style={st.cardTop}>
               <Text style={st.forSale}>À VENDA</Text>
-              <Text style={st.brandMark}>Régua</Text>
+              <Text style={st.brandMark}>Valor do Carro</Text>
             </View>
             <Text style={st.cardBrand}>{v.brand.name}</Text>
             <Text style={st.cardModel}>{v.model.name}</Text>

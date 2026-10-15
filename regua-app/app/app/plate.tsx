@@ -69,8 +69,8 @@ export default function Plate() {
       <View style={{ gap: s[3] }}>
         <Message title={`Você já fez as ${answer.limit} consultas por placa de hoje.`}
           detail={answer.plus ? 'O limite volta amanhã. A busca por marca e modelo continua livre.'
-            : plus.available ? 'Amanhã tem mais. Com o Régua Plus você consulta mais placas por dia.' : 'Amanhã tem mais. A busca por marca e modelo continua livre.'} />
-        {!answer.plus && plus.available ? <Button label="Conhecer o Régua Plus" onPress={() => router.push('/plus')} /> : null}
+            : plus.available ? 'Amanhã tem mais. Com o Valor do Carro Plus você consulta mais placas por dia.' : 'Amanhã tem mais. A busca por marca e modelo continua livre.'} />
+        {!answer.plus && plus.available ? <Button label="Conhecer o Valor do Carro Plus" onPress={() => router.push('/plus')} /> : null}
         {manual}
       </View>
     );

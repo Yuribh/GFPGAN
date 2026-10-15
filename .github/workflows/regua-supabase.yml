@@ -1,8 +1,8 @@
-name: Régua Supabase deploy
+name: Valor do Carro Supabase deploy
 
 # Puts the backend online in your Supabase project: database tables (migrations), the Edge Functions
 # (plate lookup, consultant, vehicle history, billing webhook, account deletion, FIPE import) and their secrets.
-# Run it from Actions › Régua Supabase deploy › Run workflow; it also runs when the functions or migrations change.
+# Run it from Actions › Valor do Carro Supabase deploy › Run workflow; it also runs when the functions or migrations change.
 # Needs (Settings › Secrets and variables › Actions):
 #   secrets: SUPABASE_ACCESS_TOKEN (supabase.com › Account › Access Tokens), SUPABASE_DB_URL (Session pooler URI)
 #   variable: SUPABASE_PROJECT_REF (the id in your project URL: https://<ref>.supabase.co)

@@ -1,4 +1,4 @@
-name: Régua store build
+name: Valor do Carro store build
 
 # Builds the store versions with EAS (Expo's cloud) and, if asked, sends them to Google Play / App Store.
 # Needs the EXPO_TOKEN secret and the EAS_PROJECT_ID variable (see regua-app/app/PUBLICAR.md).
