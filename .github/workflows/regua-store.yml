@@ -1,0 +1,43 @@
+name: Valor do Carro store build
+
+# Builds the store versions with EAS (Expo's cloud) and, if asked, sends them to Google Play / App Store.
+# Needs the EXPO_TOKEN secret and the EAS_PROJECT_ID variable (see regua-app/app/PUBLICAR.md).
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'android, ios or all'
+        default: android
+        required: true
+      submit:
+        description: 'send to the store after the build (true/false)'
+        default: 'false'
+        required: true
+
+jobs:
+  eas:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: regua-app/app
+    env:
+      EAS_PROJECT_ID: ${{ vars.EAS_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: regua-app/app/package-lock.json
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      - run: npm ci
+      - run: npm test
+      - run: npx tsc --noEmit
+      - name: Check required settings
+        run: |
+          test -n "$EAS_PROJECT_ID" || { echo "::error::Set the EAS_PROJECT_ID repository variable (run 'npx eas-cli init' once, see PUBLICAR.md)"; exit 1; }
+      # app keys and ids live in EAS (eas env), so the build in Expo's cloud sees them too
+      - run: eas build --platform ${{ inputs.platform }} --profile production --non-interactive --no-wait ${{ inputs.submit == 'true' && '--auto-submit' || '' }}

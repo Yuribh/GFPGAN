@@ -1,0 +1,76 @@
+name: Valor do Carro site
+
+# Publishes regua-app/app/landing (home, privacy policy, terms, support) and the web prototype to GitHub Pages:
+# https://<owner>.github.io/<repo>/  (the store listings link to privacidade.html and suporte.html there)
+on:
+  push:
+    branches: [master, claude/regua-app-iyjqep]
+    paths: ['regua-app/app/landing/**', 'regua-app/app/prototype/**', 'regua-app/app/src/**', '.github/workflows/regua-site.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: regua-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      pages: ${{ steps.pages.outputs.enabled }}
+    steps:
+      - uses: actions/checkout@v4
+      # publishing needs GitHub Pages turned on (Settings > Pages > Source: GitHub Actions); until then, build only
+      - id: pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh api "repos/${{ github.repository }}/pages" --silent 2>/dev/null; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=GitHub Pages is off::The site was built but not published. Turn it on in Settings > Pages > Source: GitHub Actions, then run this workflow again."
+          fi
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Assemble the site
+        working-directory: regua-app/app
+        env:
+          # repository variables (Settings > Secrets and variables > Actions > Variables)
+          RESPONSAVEL: ${{ vars.REGUA_RESPONSAVEL }}
+          EMAIL: ${{ vars.REGUA_EMAIL }}
+          PLATE_PROVIDER: ${{ vars.REGUA_PLATE_PROVIDER }}
+          HISTORY_PROVIDER: ${{ vars.REGUA_HISTORY_PROVIDER }}
+        run: |
+          (cd prototype && node build.mjs)
+          mkdir -p _site/prototipo
+          cp -r landing/. _site/
+          cp prototype/dist/index.html _site/prototipo/index.html
+          sed -i 's#\.\./prototype/dist/index\.html#prototipo/#g' _site/index.html
+          # fill the owner details in the legal pages when the variables are set
+          for f in _site/privacidade.html _site/termos.html _site/suporte.html; do
+            if [ -n "$RESPONSAVEL" ]; then sed -i "s#\[nome completo ou razão social e CPF/CNPJ\]#${RESPONSAVEL//#/\\#}#g" "$f"; fi
+            if [ -n "$EMAIL" ]; then sed -i "s#\[e-mail de suporte\]#<a href=\"mailto:$EMAIL\">$EMAIL</a>#g; s#\[e-mail\]#<a href=\"mailto:$EMAIL\">$EMAIL</a>#g" "$f"; fi
+            if [ -n "$HISTORY_PROVIDER" ]; then sed -i "s#<strong class=\"todo\">\[nome do fornecedor de histórico\]</strong>#<strong>${HISTORY_PROVIDER//#/\\#}</strong>#g" "$f"; fi
+            if [ -n "$PLATE_PROVIDER" ]; then sed -i "s#<strong class=\"todo\">\[nome do fornecedor\]</strong>#<strong>${PLATE_PROVIDER//#/\\#}</strong>#g" "$f"; fi
+            if [ -n "$RESPONSAVEL" ] && [ -n "$EMAIL" ]; then sed -i 's/ class="todo"//g' "$f"; fi
+          done
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: regua-app/app/_site
+
+  deploy:
+    needs: build
+    if: needs.build.outputs.pages == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

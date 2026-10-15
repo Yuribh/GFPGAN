@@ -1,0 +1,112 @@
+name: Valor do Carro CI
+
+# Every push to the app: unit tests, type check, database checks, and an end-to-end smoke test with REAL FIPE data:
+# fresh database -> migrations -> import of a small slice of the live FIPE API -> read back through PostgREST
+# (the REST layer Supabase uses) with the app's own data code.
+on:
+  push:
+    branches: [master, claude/regua-app-iyjqep]
+    paths: ['regua-app/app/**', '.github/workflows/regua-ci.yml']
+  pull_request:
+    paths: ['regua-app/app/**', '.github/workflows/regua-ci.yml']
+  workflow_dispatch:
+
+concurrency:
+  group: regua-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: regua-app/app
+    env:
+      NODE_OPTIONS: --disable-warning=MODULE_TYPELESS_PACKAGE_JSON
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: regua-app/app/package-lock.json
+      - run: npm ci
+      - name: Unit tests
+        run: npm test
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Real FIPE table read by the app without Supabase (the APK's default)
+        run: node scripts/smoke-live.mts
+
+      - name: Start PostgreSQL (preinstalled on the runner)
+        run: sudo systemctl start postgresql.service && pg_lsclusters
+      - name: Database checks (access rules, ingestion, billing, quotas)
+        run: sudo -E bash supabase/tests/run.sh
+
+      - name: Fresh database like a new Supabase project
+        run: |
+          sudo -u postgres psql -q -c "create role ci login superuser password 'ci'" -c "create database regua_ci"
+          for r in anon authenticated service_role; do sudo -u postgres psql -q -c "do \$\$ begin if not exists (select 1 from pg_roles where rolname='$r') then create role $r nologin; end if; end \$\$"; done
+          sudo -u postgres psql -q -d regua_ci < supabase/tests/supabase_stub.sql
+      - name: Migrations
+        env:
+          DATABASE_URL: postgres://ci:ci@127.0.0.1:5432/regua_ci
+        run: node scripts/migrate.mts && node scripts/migrate.mts
+      - name: Import a slice of the real FIPE table
+        env:
+          DATABASE_URL: postgres://ci:ci@127.0.0.1:5432/regua_ci
+          FIPE_API_TOKEN: ${{ secrets.FIPE_API_TOKEN }}
+        run: node scripts/import-fipe.mts --months 2 --budget 40 --rpm 120
+      - name: Read it back through PostgREST with the app's code
+        env:
+          DATABASE_URL: postgres://ci:ci@127.0.0.1:5432/regua_ci
+        run: |
+          sudo -u postgres psql -q -d regua_ci < supabase/tests/after_migrate.sql
+          # Supabase's service_role (used by the Edge Functions) bypasses RLS
+          sudo -u postgres psql -q -d regua_ci -c "alter role service_role bypassrls" \
+            -c "grant usage on schema public to service_role" \
+            -c "grant all on all tables in schema public to service_role" \
+            -c "grant all on all sequences in schema public to service_role" \
+            -c "grant execute on all functions in schema public to service_role"
+          sudo -u postgres psql -q -c "create role authenticator login noinherit password 'auth'" -c "grant anon, service_role to authenticator"
+          curl -sL https://github.com/PostgREST/postgrest/releases/download/v12.2.3/postgrest-v12.2.3-linux-static-x64.tar.xz | tar xJ -C /tmp
+          SECRET=ci-secret-ci-secret-ci-secret-ci-secret-12345
+          printf 'db-uri = "postgres://authenticator:auth@127.0.0.1:5432/regua_ci"\ndb-schemas = "public"\ndb-anon-role = "anon"\njwt-secret = "%s"\nserver-port = 3000\n' "$SECRET" > /tmp/pgrst.conf
+          /tmp/postgrest /tmp/pgrst.conf > /tmp/pgrst.log 2>&1 &
+          jwt() { node -e "const c=require('crypto');const b=o=>Buffer.from(JSON.stringify(o)).toString('base64url');const h=b({alg:'HS256',typ:'JWT'}),p=b({role:process.argv[1]});console.log(h+'.'+p+'.'+c.createHmac('sha256',process.argv[2]).update(h+'.'+p).digest('base64url'))" "$1" "$SECRET"; }
+          ANON_KEY=$(jwt anon); SERVICE_KEY=$(jwt service_role)
+          # ready = the schema cache is loaded and a real table answers, not just the port
+          code=000
+          for i in $(seq 1 60); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' -H "apikey: $ANON_KEY" -H "Authorization: Bearer $ANON_KEY" 'http://127.0.0.1:3000/brands?limit=1' || true)
+            [ "$code" = 200 ] && break; sleep 1
+          done
+          if [ "$code" != 200 ]; then echo "PostgREST not ready (HTTP $code)"; cat /tmp/pgrst.log; exit 1; fi
+          PGRST_URL=http://127.0.0.1:3000 ANON_KEY="$ANON_KEY" node scripts/smoke-read.mts || { cat /tmp/pgrst.log; exit 1; }
+          echo "SERVICE_KEY=$SERVICE_KEY" >> "$GITHUB_ENV"
+      - name: Plate lookup and history report end to end (fake providers, real FIPE rows)
+        env:
+          DATABASE_URL: postgres://ci:ci@127.0.0.1:5432/regua_ci
+          PGRST_URL: http://127.0.0.1:3000
+          SMOKE_RESET: '1'
+        run: node scripts/smoke-plate.mts "$SERVICE_KEY" || { cat /tmp/pgrst.log; exit 1; }
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Deployed plate function in Deno (the Supabase runtime), and plates priced through the real FIPE API
+        env:
+          DATABASE_URL: postgres://ci:ci@127.0.0.1:5432/regua_ci
+          PGRST_URL: http://127.0.0.1:3000
+          SMOKE_RESET: '1'
+        run: |
+          node scripts/build-functions.mjs
+          node scripts/smoke-functions.mts "$SERVICE_KEY" --live-fipe
+          # every bundle must at least start in Deno (outside the project folder, like on Supabase)
+          for f in supabase/.build/supabase/functions/*/index.ts; do
+            d=$(mktemp -d); cp "$f" "$d/"; (cd "$d" && timeout 60 deno run --allow-all index.ts > log 2>&1 &)
+            for i in $(seq 1 50); do grep -q Listening "$d/log" && break; sleep 1; done
+            grep -q Listening "$d/log" || { echo "FAIL $f"; cat "$d/log"; exit 1; }
+            echo "starts: $f"; pkill -x deno || true; sleep 1
+          done
